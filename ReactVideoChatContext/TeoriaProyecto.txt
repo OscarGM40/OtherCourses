@@ -1,0 +1,71 @@
+      REACT VIDEO CHAT WITH WEBRTC AND APICONTEXT
+
+Source: https://www.youtube.com/watch?v=oxFr7we3LC8
+
+Creo un proyecto Node,instalo express cors y socket.io y lo que crea conveniente en el proyecto.Creo los dos server,abro las cors,etc...
+Fijate que el socketServer es muy sencillo.Emitirá el id al que lo pida y pasa la llamada y la señal y la cierra si cae la conexión:
+
+io.on('connection', (socket) => {
+
+   // realmente no hace falta emitir a toda la sala,solo al socket que lo pida
+   socket.emit('me',socket.id);
+
+   // si el socket se desconectara emito a todos menos a mi el evento calleneded
+   socket.on("disconnect", () => {
+      socket.broadcast.emit("callEnded")
+   })
+   
+   /* Un cliente emitirá el evento callUser con este objeto data={
+      userToCall:id al que llamar
+      signalData:la señal peer
+      from: id del que llama
+      name:el name de ??
+   } Cuando lo recibe el server lo emite de vuelta SÓLO al user que queremos,que lógicamente es al que llamo.Le paso todo de vuelta menos el id,ya que es el suyo y no es necesario Fijate que lo emite automáticamente*/
+   socket.on("callUser", ({ userToCall,signalData,from,name }) => {
+      io.to(userToCall).emit("callUser",{
+         signal:signalData,
+         from,
+         name
+      })
+   })
+
+   // cuando un cliente emita el evento answerCall le paso a data.to la señal en el evento callAccepted(no lo habia pasado ya arriba??)
+   socket.on("answerCall",(data) => {
+      io.to(data.to).emit("callAccepted",data.signal)
+   })
+   
+})
+
+         PARTE DEL FRONTEND
+
+El frontend también va a ser sencillo.Creo un Componente App(la UI) que estará formada por otros tres(VideoPlayer para cada <video></video> y zona de Notificaciones y Opciones) 
+
+En cuanto al Context que voy a crear la lógica estará en estas tres funciones:
+
+import React, { createContext, useState, useRef, useEffect } from "react";
+import { io } from "socket.io-client";
+import Peer from "simple-peer";
+
+const SocketContext = createContext();
+
+const socket = io("http://localhost:8000");
+
+const ContextProvider = ({ children }) => {
+   useEffect(() =>{},[])
+   const answerCall = () => {};
+   const callUser = () => {};
+   const leaveCall = () => {};
+   
+  return (
+    <>
+      <SocketContext.Provider value={{
+         
+      }}>{children}</SocketContext.Provider>
+    </>
+  );
+};
+
+* Fijate que tendré la lógica en answerCall,callUser y leaveCall y el efecto Diria que usar los ids de Mongo me va a salvar las rellamadas.
+
+Como puedo observar de la libreria react-copy-to-clipboard me proporcionan simplemente un Wrapper.La propiedad text es vital,ya que será lo que copie al portapapeles(en este caso el id de cada usuario).
+IMPORTANTE: en netlify puedo crear despliegues rápidos también para React,de igual forma que en Angular arrastro la carpeta build y ya está.

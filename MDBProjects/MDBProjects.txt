@@ -1,0 +1,205 @@
+					MATERIAL DESIGN AND BOOTSTRAP  FOR JAVASCRIPT | REACT | ANGULAR | VUEJS
+
+DOC: https://mdbootstrap.com/docs/standard/
+
+Material Design for Bootstrap 5 offers +700UI components and templates.También ofrece hosting free y una licencia MIT free para uso personal.
+
+Se puede instalar versiones para Javascript,React o Angular y Vue:
+
+>npm i mdb-ui-kit
+
+>import * as mdb from 'mdb-ui-kit'; // lib
+To import MDB stylesheet please use the following syntax:
+>@import '~mdb-ui-kit/css/mdb.min.css';
+
+También se pueden usar CNDs etc,... Lo mejor es ir a su documentación oficial.Alli puedo incluso descargarme el starter(es un index.html con las CDNs)
+
+				MDB CLI
+
+Para usar la cli hay que tener NOde en el sistema.Con eso puedo instalar la cli suya:
+>npm i -g mdb-cli
+* aun falta tener una cuenta :
+>mdb login
+
+oscar@acer-linux:/media/oscar/CRUCIALX6/MaterialBootstrap$ mdb login
+? Enter your MDB username OscarGM40
+? Enter your MDB password **********
+Successfully logged in.
+
+Si no tengo una cuenta puedo incluso usar el comando mdb register(o ir a la web y registrarme)
+
+Una vez con la cli y logeado puedo empezar a usar sus ventajas:
+
+>mdb init <- crea un proyecto en la ubicación actual.
+* Esto me dará todos los starters que tienen.Debo elegir uno
+
+Esto me creará un folder con el starter que eliga,asi que lo abro en el editor que quiera.
+There I can get rid off everything I don't want to use.Vamos a empezar por una navbar,asi que simplemente voy a la docu y busco por el componente deseado.
+
+						COLORS
+
+Como colores ofrecen primary(azul) | secondary(magenta) | success(verde) | danger(rojo) | warning(amarillo) | info(azul celeste) | light(casi blanco,pero no del todo) | dark(negro)
+
+Puedo cambiar el color de la navbar con bg-primary | light | secondary,etc,... Como está venia en light es casi blanca,si quiero la de facebook tendrá que ser bg-primary
+Si no me gusta siempre puedo usar mi azul,etc...
+Además que podría cambiar su definicion de primary a mi azul,etc...
+
+						GRID
+
+El grid es el de Boostrap,simplemente con usar su clase container en un div pongo ese div en flex y despues row y col,añadiendo los breakpoints:
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-5">Left</div>
+    <div class="col-md-7>Right</div>
+
+				HOVER EFFECTS
+
+Puedo usar efectos de ripple en imagenes muy chulos,incluso cambiandole el color:
+  <div  class="bg-image hover-overlay ripple shadow-1-strong rounded"
+        data-mdb-ripple-color="light" >
+<img ....>
+LA propiedad que le da el color del ripple es esa data-mdb-ripple-color.
+Asi el efecto de agua será de color blanco pero si lo cambio a primary queda muy bonito.
+
+Este efecto ripple se puede usar en más componentes.Para aprender como debo leerlo en la documentación(al final es añadiendo la clase ripple a cualquier elemento clickable):
+
+<a class="ripple" href="#!"> 
+ <img
+    alt="example"
+    class="img-fluid rounded" src="..."
+</a> <- solo con añadir la clase ya tendrá el efecto ripple tan bonito
+
+Para cambiar el color:
+<button data-mdb-ripple-color="primary"
+O por nombre de la clase CSS
+<button data-mdb-ripple-color="orange"
+O por Hexadecimal
+<button data-mdb-ripple-color="#c953d6" 
+* Puedo ver que las propiedades son inmensas.
+
+					TYPOGRAPHY
+
+Boostrap ofrece varias clases para tipografías las cuales son responsables por defecto(se van haciendo más pequeñas a medida que el screen size disminuye).Es decir,que se adaptan.
+
+Es común añadir la clase text-muted para apagar un poco los parrafos y que el encabezado de ellos tome más protagonismo.
+
+						SPACING
+
+Es el de bootstrap m o p + t-b-r-l-x-y...Despues del 1 al 5.Pero ahora es start y end en vez de left y right
+
+					BUTTONS
+
+Como siempre hay outlined,con el color que quiera y con ripple por defecto.
+
+<button type="button" class="btn btn-outline-success" data-mdb-ripple-color="dark">
+  Success
+</button>
+
+Acuerdate del snipet col-md-4*3 <- multiplica para crear varios.
+Los gutters son espaciados entre las columnas(gx-5 | 4) <- solo crean espacios entre las columnas,no contra los margenes.Ejemplo:
+|  col1   col2  col3  |  <- si aplico gutter no va a separar col1 de la pared,solo de col2,a col2 le separará de ambos y a col3 solo de col2.
+Muy útil.
+
+Puedo cambiar el name en el package.json y me cambiará el subdominio con el mdb publish.
+Tienen una extensión de VSC llamada mdb5 standard code snippets
+
+								FACEBOOK PROFILE CLONE PROJECT 
+
+Source: https://www.youtube.com/watch?v=Qt3Bu8WQTno&list=PLl1gkwYU90QkeAAHno3iVJokh2evwMwaX&index=12
+
+* NAVBAR
+Fijate como puedo crear mi propia navbar fácilmente metiendo 3 divs.Fijate como puedo usar notificaciones fácilmente en los iconos con mdb.
+    <span class="badge rounded-pill badge-notification bg-danger">4</span>
+
+Con la clase "hidden-arrow" puedo ocultar las flechas de las listas tipo "dropdown".Siempre va en el elemento que lleve también la clase dropdown-toogle,ya que éste será el que acciona el dropdown y el que quiero ocultar.
+
+A la par que uso la clase "dropdown-menu" puedo alinear ese menu(ya que a veces necesitaré alinearlo si se sale de la pantalla).Para ello tengo la clase dropdown-menu-end(antes era-dropdown-menu-right).Incluso permite pasarle breakpoints como dropdown-menu-sm-end + dropdown-menu-md-start.
+Aqui un pequeño ejemplo:
+
+  <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle hidden-arrow" href="#" id="navbarDropdownMenuLink" role="button"
+           data-mdb-toggle="dropdown" aria-expanded="false">
+             <i class="fas fa-users fa-lg"></i>
+        </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+            <li>
+              <a class="dropdown-item" href="#">Action</a>
+           </li>
+			....más dropdown-items....
+
+* BODY
+Fijate que tengo que tengo dos secciones en el body,la mitad superior el fondo es blanco y la mitar inferior gris claro.
+
+BACKGROUND IMAGES
+Puedo crear un div que tenga de fondo una imagen,despues darle un box-shadow con la clase shadow y redondear solo las esquinas de abajo o arriba con rounded-bottom | top.Con otro div con la clase mask consigo que tenga ripple.
+ <div
+    class="p-5 text-center bg-image shadow-1-strong rounded-bottom"
+    style="
+      background-image: url('https://mdbcdn.b-cdn.net/img/new/slides/041.jpg');
+      height: 400px;
+    "
+  >
+
+Para el avatar tengo la clase 'rounded-circle que siempre va a redondear.Para centrar en el eje X he tenido que usar un div con d-flex y justify-content-center:
+
+<div class="d-flex justify-content-center">
+
+    <img src="https://mdbootstrap.com/img/new/avatars/18.jpg" alt="" 
+    class="rounded-circle shadow-3-strong position-absolute" 
+    style="margin-top:-100px;width: 140px;">
+  </div>
+* Esta claro que sin div extras no puedo hacer nada.
+
+Fijate como puedo dejar un 25% de margen a la izquierda y derecha si pongo ese contenido en una row.d-flex.justify-content-center y una única columna de 6 :
+div class="row d-flex justify-content-center>
+<div class="col-md-6>
+ contenido centrado con 25% de margen
+
+Para usar un modal en Boostrap tengo que usar los atributos data-mdb-toggle y data-mdb-target(antes solo data-toggle y data-target) en el botón que lo abra.El id del modal debe coincidir con el data-target(que usa referencias locales):
+
+   <button class="btn btn-light btn-block btn-rounded bg-light ms-2"
+           data-mdb-toggle="modal" data-mdb-target="#exampleModal">What's on your mind?</button>
+* El modal necesita un id con el valor de la misma referencia
+
+Para usar emojis necesito:
+Step 1. Make sure you put this code inside the head of your HTML document (if you haven’t already). You need to do this in order for your emojis to display consistently across various browsers.
+<meta charset=“UTF-8”>
+
+						FACEBOOK MESSENGER WITH BOOTSTRAP 5
+
+Source: https://www.youtube.com/watch?v=-FAhhE0qmvM&list=PLl1gkwYU90QkeAAHno3iVJokh2evwMwaX&index=27
+
+Recuerda que las clases margin-right y margin-left no fueron las únicas afectadas.Float-left y float-right dejaron de existir también en B5 y también son float-end y float-start ya.
+Recuerda que con la clase text-reset puedo remover estilos.Muy útil para enlaces,etc...
+
+					WIDGET FORECAST WITH WEATHER API CONNECTION
+
+Source: https://www.youtube.com/watch?v=xiQIjbRFWLE&list=PLl1gkwYU90QkeAAHno3iVJokh2evwMwaX&index=22
+
+Lo primero me registro en OpenWeather,despues genero una API KEY desde mi perfil.
+How to make an API call
+API call
+
+https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&exclude={part}&appid={API key}
+
+Parameters
+lat, lon	required	Geographical coordinates (latitude, longitude)
+appid	required	Your unique API key (you can always find it on your account page under the "API key" tab)
+exclude	optional	By using this parameter you can exclude some parts of the weather data from the API response. It should be a comma-delimited list (without spaces).
+Available values:
+
+current
+minutely
+hourly
+daily
+alerts
+units	optional	Units of measurement. standard, metric and imperial units are available. If you do not use the units parameter, standard units will be applied by default. Learn more
+lang	optional	You can use the lang parameter to get the output in your language. Learn more
+
+Ejemplo de una llamada
+https://api.openweathermap.org/data/2.5/onecall?lat=33.44&lon=-94.04&exclude=hourly,daily&appid={API key}
+
+Resumen,tengo que proveer la latitud/lat y la longitud/lon y la key/appid obligatoriamente y puedo excluir parametros con la queryParam exclude.
+IMPORTANTE: tengo que usar también &units=metric como medida para Europe(sino lo veré en grados Farenheit)
+

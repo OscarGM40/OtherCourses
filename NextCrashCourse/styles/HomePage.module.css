@@ -1,0 +1,17 @@
+.h1 {
+   background-color: red;
+}
+
+.h1::after {
+   content: url('../public/favicon.ico') ;
+   /* display:block; */
+   padding-left: 40px;
+   color:antiquewhite;
+   background: orangered;
+
+}
+
+.flex01{
+   height: 30px;  
+   display: flex;
+}

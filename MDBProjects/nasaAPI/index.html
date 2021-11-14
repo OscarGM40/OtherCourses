@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <title>Material Design for Bootstrap</title>
+  <!-- MDB icon -->
+  <link rel="icon" href="img/mdb-favicon.ico" type="image/x-icon" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css" />
+  <!-- Google Fonts Roboto -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" />
+  <!-- MDB -->
+  <link rel="stylesheet" href="css/mdb.min.css" />
+
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+</head>
+
+<body>
+  <!-- Start your project here-->
+  <div class="container">
+    <div class="row">
+      <div class="form-group mt-3 " autocomplete="off">
+        <input  id="calendar" type="text" placeholder="Selecciona una fecha" autocomplete="off"/>
+      </div>
+      <!-- first 8 columns -->
+      <div class="col-md-8 mb-4 mb-md-0">
+
+        <section id="wrapper-media"> </section>
+      </div>
+    </div>
+
+
+  </div>
+  <!-- end of last 8 columns -->
+
+  <!-- last 4 columns -->
+  <div class="col-md-4 mb-4 mb-md-0">
+    <h5 id="wrapper-title"></h5>
+
+    <p id="wrapper-explanation"></p>
+  </div>
+  <!-- end of last 4 columns  -->
+  <!-- End your project here-->
+
+  <!-- MDB -->
+  <script type="text/javascript" src="js/mdb.min.js"></script>
+  <script type="text/javascript" src="index.js"></script>
+  <!-- Custom scripts -->
+  <script type="text/javascript">
+
+    let fechaSeleccionada = null;
+    
+    $(function() {
+
+      $('#calendar').daterangepicker({
+        singleDatePicker: true,
+        showDropdowns: true,
+        autoUpdateInput: false,
+        minYear: 1996,
+        maxYear: 2040,
+        showWeekNumbers: true,
+        locale: {
+          format: "MM/DD/YYYY",
+          separator: " - ",
+          applyLabel: "Aceptar",
+          cancelLabel: "Cancelar",
+          customRangeLabel: "Custom",
+          weekLabel: "Sem",
+          daysOfWeek: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
+            monthNames: [
+              "Enero",
+              "Febrero",
+              "Marzo",
+              "Abril",
+              "Mayo",
+              "Junio",
+              "Julio",
+              "Agosto",
+              "Septiembre",
+              "Octubre",
+              "Noviembre",
+              "Diciembre",
+            ],  
+            firstDay: 1,
+          },  
+          
+        }, function(start, end, label) {
+          fechaSeleccionada = moment(start).format("YYYY-MM-DD");
+        });
+        
+        $('#calendar').on('cancel.daterangepicker', function(ev, picker) {
+          //do something, like clearing an input  
+          $('#calendar').val('');
+        });  
+        $('#calendar').on('apply.daterangepicker', function(ev, picker) {
+          $('#calendar').val(picker.startDate.format('DD/MM/YYYY'));
+          fetch(`https://api.nasa.gov/planetary/apod?api_key=YUHnP0OWEpw4sNgKeWbhllTdeb4hoVL9009H7zEv&date=${fechaSeleccionada}`)
+          .then( response => response.json())
+          .then( data => {
+
+            let date = data.date;
+            let explanation = data.explanation;
+            let hdurl = data.hdurl;
+            let media_type = data.media_type;
+          let title = data.title;
+          let url = data.url;
+          
+          let imageType = `
+          <div class="bg-image hover-overlay ripple shadow-1-strong rounded hover-zoom"
+          data-ripple-color="light">
+          <img src="" 
+          class="img-fluid w-100"
+          id="wrapper-image" />
+          <a href="" id="wrapper-hdurl" target="_blank">
+            <div class="mask" style="background-color: rgba(57, 192, 237, 0.2);">`;
+      
+              let videoType = `
+              <div class="ratio ratio-16x9">
+                <iframe
+                id="wrapper-video"
+                src=""
+                title="YouTube video"
+                allowfullscreen
+                ></iframe>
+                </div>`
+                
+                
+                document.getElementById("wrapper-title").innerHTML = title;
+                document.getElementById("wrapper-explanation").innerHTML = explanation;
+                
+                if (media_type === "video") {
+                  document.getElementById("wrapper-media").innerHTML = videoType;
+                  document.getElementById("wrapper-video").src = url;
+                } else {
+                  
+                  document.getElementById("wrapper-media").innerHTML = imageType;
+                  document.getElementById("wrapper-image").src = url;
+                  document.getElementById("wrapper-hdurl").href = hdurl;
+                  
+                }
+           })
+          .catch( console.log );    
+          
+        });
+        
+      });  
+      
+      let xmlhttp = new XMLHttpRequest();
+      xmlhttp.onreadystatechange = function () {
+        // si hay respuesta y es exitosa
+        if (this.readyState == 4 && this.status == 200) {
+          let data = JSON.parse(this.responseText);
+          console.log(data);
+          
+          const settings = {
+            "async": true,
+            "crossDomain": true,
+            "url": "https://google-translate1.p.rapidapi.com/language/translate/v2",
+            "method": "POST",
+            "headers": {
+              "x-rapidapi-host": "google-translate1.p.rapidapi.com",
+              "x-rapidapi-key": "e7367ce50cmsh4bb1d98d4bcad87p14dc45jsn3291cb96fb09"
+            },
+            "data": {
+              "q": `${data.explanation}`,
+              "target": "es",
+              "source": "en"
+            }
+          };
+          
+          $.ajax(settings).done(function (response) {
+            console.log(response);
+          });
+          //  let copyright = data.copyright;
+          let date = data.date;
+        let explanation = data.explanation;
+        let hdurl = data.hdurl;
+        let media_type = data.media_type;
+        let title = data.title;
+        let url = data.url;
+
+        let imageType = `
+        <div class="bg-image hover-overlay ripple shadow-1-strong rounded hover-zoom"
+        data-ripple-color="light">
+        <img src="" 
+        class="img-fluid w-100"
+        id="wrapper-image" />
+        <a href="" id="wrapper-hdurl" target="_blank">
+          <div class="mask" style="background-color: rgba(57, 192, 237, 0.2);">`;
+
+        let videoType = `
+            <div class="ratio ratio-16x9">
+              <iframe
+              id="wrapper-video"
+              src=""
+              title="YouTube video"
+              allowfullscreen
+              ></iframe>
+              </div>`
+
+
+        document.getElementById("wrapper-title").innerHTML = title;
+        document.getElementById("wrapper-explanation").innerHTML = explanation;
+
+        if (media_type === "video") {
+          document.getElementById("wrapper-media").innerHTML = videoType;
+          document.getElementById("wrapper-video").src = url;
+        } else {
+
+          document.getElementById("wrapper-media").innerHTML = imageType;
+          document.getElementById("wrapper-image").src = url;
+          document.getElementById("wrapper-hdurl").href = hdurl;
+
+        }
+        document.getElementById("wrapper-hdurl").href = hdurl;
+
+
+      }
+    };
+
+    let queryUrl = "https://api.nasa.gov/planetary/apod?";
+    let queryKey = "api_key=YUHnP0OWEpw4sNgKeWbhllTdeb4hoVL9009H7zEv&";
+    let queryDate = `date=${fechaSeleccionada}&`
+    let queryFull;
+
+    if(fechaSeleccionada){
+       queryFull = queryUrl + queryKey+queryDate;
+      }else{
+      queryFull = queryUrl + queryKey;
+    }
+
+    xmlhttp.open("GET", queryFull);
+    xmlhttp.send();
+
+
+  </script>
+</body>
+
+</html>

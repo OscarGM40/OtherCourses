@@ -1,0 +1,53 @@
+
+
+ REALTIME NOTIFICATIONS BY LAMA WITH REACT AND SOCKET-IO
+
+ Source: https://www.youtube.com/watch?v=7vVqMR96T5o&t=789s
+
+
+Siendo un usuario por ejemplo John,cuando él dé like en un Post de Monica,dicha usuaria Mónica va a recibir una notificación ,además podrá desplegar el icono de notificaciones y verá "John has liked your Post,etc...
+
+En cuanto a SocketIO es importante recalcar que no consume recursos de mi servidor,es como mandar un ping,es muy ligera.
+
+Fijate que fácil es usar import,export en un backend de Node,simplemente le paso en el package.json "type":"module" ya que está en commonsJS por defecto.
+
+Recuerda que el cliente sólo puede emitir y recibir(socket.emit y socket.on).
+El server posee mas lógica y puede emitir a todo el canal(io.emit) o a un usuario en concreto(io.to(id).emit).
+Tambien puede emitir a todos menos al que emitió con io.broadcast.emit.
+Para escuchar eventos lo hace con socket.on(el arg de la cb)
+Ver documentación 
+
+Eventos:
+cuando alguien haga click en un botón de Share,liked,etc de un determinado usuario voy a mandar un evento al servidor socket.El server tomará ese evento y lo mandará a ese user en concreto
+
+Cuando un usuario se conecta informa al servidor que lleva el registro de quienes están online(ya lo tengo echo)
+
+Fijate que realizar esto creará un bucle infinito,pero puedo evitarlo con previous(y fijate de nuevo en lo importante que es esto)
+* Mal,el setter afecta a una dependencia del efecto directamente
+useEffect(() => {
+   socket.on("getNotification",data => {
+      setNotifications([...notifications,data])
+   })
+},[socket,notifications])
+
+* BIen,llamo al estate anterior y con el spread opero 
+useffect(() => {
+   socket.on("getNotification",data => {
+      setNotifications(prev => [...prev,data])
+   })
+},[socket])
+
+* Fijate incluso que la primera forma me pide notifications como dependencia del array asi que eso es una pista!
+
+Realmente era muy sencillo manejar las notificaciones,cuando un usuario haga un comentario se envia una de tipo comentario,cuando dé un like lo mismo y cuando haga un share se envia una notificacion con el tipo que quiera:
+
+* Las almaceno en un array de momento:
+
+const [ notifications, setNotifications ] = useState([])
+   
+useEffect(() => {
+   socket.on("getNotification",data => {
+      setNotifications(prev => [...prev,data])
+   })
+},[socket])
+console.log(notifications)

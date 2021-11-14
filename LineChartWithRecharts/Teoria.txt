@@ -1,0 +1,74 @@
+			COMO CREAR UNA GRÁFICA DE LINEAS CON RECHARTS
+
+Fuente: https://www.youtube.com/watch?v=z1KuuHLOY9c
+
+Si miro la documentación oficial en https://recharts.org/en-US/examples
+puedo ver el siguiente ejemplo:
+ <ResponsiveContainer width="100%" height="100%">
+        <LineChart
+          width={600}
+          height={300}
+          data={data}
+          margin={{
+            top: 5,
+            right: 30,
+            left: 20,
+            bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Line type="monotone" dataKey="pv" stroke="#8884d8" activeDot={{ r: 8 }} />
+          <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
+        </LineChart>
+      </ResponsiveContainer>
+
+En este caso <LineChart> me indica que es una gráfica de lineas pero obviamente podia ser una PipeChart | SimpleAreaChat | BiaxialChat (hay decenas de tipos)
+Puedo ver que le puedo pasar un margin al elemento XXXChart con margenes,y que debo pasarle la data.TAmbién le puedo pasar un width y height en bruto
+
+El eje Cartesiano se refiere a la distancia entre guiones:
+  <CartesianGrid strokeDasharray="3 3" />
+* Puedo ver como incluso puedo pintarlo condicionalmente del color que quiera esos guiones
+{ grid && <CartesianGrid stroke="#e0dfdf" strokeDasharray="5 5"/>}
+
+Cada <Line> es una linea(en este ejemplo hay dos).Tiene que recibir una dataKey que apunte a la propiedad que representa(pv y uv)
+<Line type="monotone" dataKey={dataKey} stroke="#5550bd" />
+Con activeDot esoecifico el radio al hacer hover:
+   activeDot={{ r: 15 }}
+
+IMPORTANTE: para que se vea la gráfica hay que usar la propiedad aspect en el <ResponsiveContainer>
+
+  <ResponsiveContainer width="100%" 
+    // height="100%" <- no usar esto
+    aspect={3} <- debe ser un valor responsive valido como 4/1 o 3(admite fracciones y floats)
+
+    PERSONALIZAR GRÁFICA Y COLORES
+
+Fijate que puedo usar la propiedad name para el eje X(aunque puedo usar la que quiera):
+   <XAxis dataKey="name" /> <- puedo cambiar ese name a month por ejemplo y tener un array de datos asi:
+   [
+     {month:'january',users:10} <- la datakey de la Line será users y la dataKey del XAxis month
+   ]    
+
+Puedo controlar los ejes Cartesianos,que por defecto están en true, poniendo uno o ambos a un string vacio:
+     <CartesianGrid horizontal="true" vertical="" />  <- sin eje vertical y sin dashes(queda bien)
+
+En cuanto a Line el type="monotone" hace curvarse la linea de forma suave.Probablemente es lo quiera la mayoría de las veces
+
+En la docu puedo ver que tengo eventos predefinidos por la libreria como onClick onMouseLeave,onMouseEvent...
+Alli podré ver por ejemplo,que tengo muchas mas propiedades que las del ejemplo:
+activeDot={{ stroke:'red',strokeWidth:2,r:8}}     
+
+Si tuviera que usar esta librería lo mejor será mirar su documentación mas detenidamente.
+
+Fijate que al subir el radio del dot y del activeDot tuve que subir el margin top de la LineChart
+
+Para cambiar el color de las leyendas de los ejes X e y hay que usar la propiedad tick:
+  <XAxis dataKey="name" tick={{ fill:"#fff" }}/>
+  <YAxis tick={{fill:"#fff"}}/>
+* Queda muy bien sobre un fondo oscuro,
+
+Por último cambiaremos las propiedades itemStyle y contentStyle del <Tooltip> que por defecto es una linea vertical fea

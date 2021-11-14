@@ -1,0 +1,348 @@
+				ANGULAR CRAS COURSE 2021
+
+Source: https://www.youtube.com/watch?v=3dHNOWTI7H8
+Repo: https://github.com/bradtraversy/angular-crash-2021
+
+Crearemos una app tracker de  tareas
+* Angular es un framework y una plataforma de desarrollo para crear eficientes y sofisticadas SPAs.
+Generalmente es usado para crear SPAs pero puede ser usado en stacks como MEAN 
+* También puede usar SSR con Angular Universal.
+
+Las ventajas que puede tener son:
+1- Framework completo(router,http,etc)
+2- RxJs integrado(programación eficiente y asíncrona)
+3- Test-friendly
+4- Popular en enterprise business
+
+Angular trabaja con componentes.Los componentes son piezas de la UI incluyendo la template(html),la lógica y el styling.
+Los componentes son reusables y pueden ser embebidos en la template como una tag XML (<app-sidebar></app-sidebar).
+
+Angular también usa Servicios.Con los servicios se incrementa la modularidad y la reusabilidad.
+
+				STARTING A PROJECT
+
+Puedo crear un proyecto con ng new <projectName> y servirlo con el servidor web embebido del framework y el comando <ng serve>.En esta landing page tengo información sobre como crear un componente o añadir librerias como Material o generar el build de producción.Muy útil.
+Si abro el package.json veré que tiene bastantes más dependencias que un proyecto React(como animations,core,forms o router) aparte de integrar también rxjs por defecto.
+También añade inteligentemente dependencias en desarrollo para typescript,@types para el tipado o para tests con karma.Se puede ver que es un proyecto más pesado y completo.
+Dentro de src estará la aplicación,de momento será un único componente.
+
+				BASIC FEATURES
+
+La primera caracteristica a mencionar sería la interpolación de strings <h1>{{ title }}</h1> 
+Se puede meter entre dobles llaves pequeñas operaciones lógicas o matemáticas e incluso el nombre de variables definidas en la clase y será inferido su valor.
+
+Empecemos creando un componente.Es un estandar usar el folder 'components' para ello:
+>ng g c components/header
+* Recuerda que creará un folder.
+En este componente creamos un div con un header(seguir video)
+
+* Vamos a crear otro componente que será un button para practicar el pase de propiedades entre padres e hijos y viceversa:
+>ng g c components/button
+
+Este componente va a estar embebido en el componente header, y queremos pasarle el texto desde el padre,ya que nuestro objetivo era crear un botón reusable.
+
+						@Input
+
+Con la directiva @Input puedo recoger propiedades que me pase el componente padre,en la template.
+Creemos dos una para el color y otra para el texto:
+*
+<app-button color="green" text="Add"> 
+
+* Me puedo inventar las que quiera.Sólo falta recogerlas en el hijo por el nombre que le dí:
+@Input() text!: string;
+@Input() color!: string;
+Usar text va a ser muy sencillo,pero para usar el color como background tengo simplemente el valor de la propiedad background-color.Necesito algo más,como la directiva ngStyle(porque es solo una regla CSS).
+
+				DIRECTIVA [ngStyle]
+
+Las directivas siempre van entre corchetes.Con la directiva [ngStyle]="{'prop':value}" puedo pasarle un valor al css de esa tag,sin importar si lo definió,ya que lo estoy haciendo yo con la directiva y tiene más especificidad.
+La sintaxis es <tag [ngStyle]="{'prop':'value}" <- un objeto de claves valor con comillas simples.
+* Ya las puedo usar <button [ngStyle]="{'background-color':color}" >{{ text }}</button>.
+
+Fijate que esta directiva es muy útil para pasar reglas CSS no muy complejas inline,y que me permite pasar varias(es un objeto de pares de clave-valor)
+[ngStyle]="{'background-color':color,'font-size':'24px'}" <- puedo usar varias
+* De esta forma puedo cambiar margenes,colores,padding,font-size,etc... fácil y rápido,usando Input.
+
+					  @Output
+
+De igual forma que puedo usar la directiva Input para recibir propiedades puedo usar @Output para mandar eventos hacia arriba.
+
+* Como quiero que el botón sea reusable no puede llevar lógica custom en él,asi que va a emitir el evento hacia el padre con @Output:
+
+*En la template alguien emite un evento:
+<button (click)="onClick()"></button>
+
+*En la clase de esa template uso Output.El nombre que le dé es muy importante,ya que es como se llamará en el padre(btnClick en este ejemplo)
+@Output btnClick:EventEmitter<T>= new EventEmitter
+
+*En esa misma clase el método ya sólo emite con emit()
+
+onClick(){
+  this.btnClick.emit();
+}
+
+* En el padre lo llamo con el nombre que usé en Output:
+<app-button (btnClick)="toggleAddTask()"> 
+
+*Desde ahora ese botón se disparará en el componente Button pero la lógica la tendré en Header.Aqui desarrollaré la lógica de esta función toggleAddTask
+
+* Fijate que he mandado el evento simplemente.Esto es realmente útil,puedo usar su funcionalidad donde quiera(pero siempre hacia arriba).
+
+			NGFOR TASK Y TASK-ITEM
+
+Fijate como puedo pasar todo el objeto actual sobre el que esté iterando a un hijo:
+
+*En la template del padre
+<app-task-item *ngFor="let task of tasks" 
+[task]="task">
+</app-task-item>			
+
+*En el hijo la recogo con un simple Input:
+export class TaskItemComponent implements OnInit {
+@Input("task") task!:Task;
+* Y gráfico lo que quiera:
+<div class="task">
+   <h3>{{task.text}}</h3>
+   <p>{{ task.day}}</p>
+</div>
+
+		AÑADIENDO ICONOS CON  ANGULAR FONT AWESOME
+
+Puedo añadir un paquete ya preparado para Angular de Font Awesome:
+>ng add @fortawesome/angular-fontawesome@<version> <- recuerda que @version no es necesario(y que el gestor instalará la última).Además ng add se puede usar sólo desde Angular 9
+
+* Fijate que no es una errata y es fortawesome.Me pedirá que elija los iconos(puedo seleccionar más con Space).Elegiremos regular,brand y solid
+
+Para implementarlos son una clase/módulo como siempre,asi que hay que requerirla y usarla en la zona de importaciones hacia el proyecto:
+import {FontAwesomeModule} from "@fortawesome/angular-fontawesome';
+
+@NgModule
+imports:[xxxModule, FontAwesomeModule,....]
+Ya sólo hay que traerse el icono y usarlo como una property de la Class:
+import { faCoffe} from "...";
+
+export class Compontent {
+	faCoffe=faCofee;
+}
+
+* Ahora ya la puedo llamar en la template con la custom tag <fa-icon [icon]="prop"></fa-icon>.Ejemplo:
+ <h3>{{task.text}} 
+     <fa-icon [icon]="faTimes"></fa-icon> 
+ </h3>
+Puedo ver que es sencillo.Dado que lo queremos rojo lo hacemos con un pequeño estilo en linea con ngStyle:
+
+<fa-icon [icon]="faTimes" [ngStyle]="{'color':'red}"
+* Recuerda que ngStyle es un objeto que usará ambos tipos de comillas
+
+					SERVICIOS Y OBSERVABLES
+
+Recuerda que puedo convertir a Observable cualquier cosa con of() que viene de rxjs.El tipo será Observable,que también viene de allí:
+
+import { Observable, of } from 'rxjs';
+
+ getTasks():Observable<Task[]>{
+    return of(TASKS);
+  }					
+
+	JSON-SERVER
+
+Fijate que puedo meter el archivo donde quiera,no tengo que crear otro proyecto como con Fernando:
+
+*Cada primer propiedad será un Array y será como una coleccion/tabla(/tasks o /products)
+{
+   "tasks":[
+      {
+        "id": "1",
+        "text": "Doctors Appointment",
+        "day": "May 5th at 2:30pm",
+        "reminder": "true"
+      },
+      {
+        "id": "2",
+        "text": "Meeting at School",
+        "day": "May 6th at 1:30pm",
+        "reminder": "true"
+      },
+    ],
+   "products":[]
+}
+
+El archivo lo dejo en el frente,donde quiera y apunto con un script del package.json:
+
+ "server":"json-server --watch src/app/helpers/db.json --port 5000" <- y le cambio el puerto para que no choque con React
+
+Podemos hacer lo mismo para borrar una Task,y es pasarla al padre,pero esta vez con argumentos:
+
+* En la template emito un evento cualquiera,pero recibe una Task para despues borrar por Task.id
+<fa-icon (click)="onDelete(task)"></fa-icon>
+
+* En la clase recibo ese método y lo mando al padre:
+
+@Output() onDeleteTask:EventEmitter<Task>= new EventEmitter();
+
+onDelete(task){
+  this.onDeleteTask.emit(task);
+}
+
+Fijate como es posible que no quiera hacer nada aparte de disparar el Observable con el subscribe:
+
+    toggleReminder(task:Task){
+      task.reminder = !task.reminder;
+      this.taskService.updateTaskReminder(task)
+      .subscribe( () => {})
+    }
+
+Fijate que hasta ahora en el padre podia recoger la Task porque estaba en un ngFor pero si le paso un evento al padre con argumentos tendré que usar $event para recoger el argumento que mando desde el hijo:
+
+<app-add-task
+(onAddTask)="addTask($event)" <- $event para recoger la task
+></app-add-task>
+
+<app-task-item 
+  *ngFor="let task of tasks" 
+  [task]="task"
+  (onDeleteTask)="deleteTask(task)" <- aqui puedo usar task
+  (onToogleReminder)="toggleReminder(task)"
+  >
+</app-task-item>
+
+Fijate que en $event viene ya la Task(no tengo que hacer event.target,ojo!).En este caso $event es una representación del argumento(y no puede ser cualquier valor asi $value,Angular no deja llamarlo de cualquier forma,sólo puede llamarse $event al argumento que venga del hijo);
+
+
+Fijate en que situaciones hay que pasarle Content-Type app/json creando el header(se debe pasar siempre que haga un submit de data,siempre que envie,o sea para el post y el put):
+
+const httpOptions= {
+  headers: new HttpHeaders({ 
+    'Content-Type': 'application/json'
+  })
+}
+
+Solo lo mandó en el post y el put
+  updateTaskReminder(task:Task):Observable<Task>{
+    return this.httpClient.put<Task>(`${this.apiUrl}/${task.id}`,task,httpOptions)
+  }
+
+ addTask(task:Task):Observable<Task>{
+   return this.httpClient.post<Task>(`${this.apiUrl}`,task,httpOptions);
+  } 
+
+CREAR PROPIO OBSERVABLE:para crear un observable propio tengo que usar la clase Subject y crear un Subject<>,despues almacenar valores con el método next y por último pasarlo a observable con instance.asObservable().Es éste último método el que creará el Observable realmente.
+Despues tendré que consumirlo en cualquier otro punto de la app
+
+* Traigo la clase
+import { Observable, Subject } from 'rxjs';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class UiService {
+ private showAddTask: boolean = false;
+ private subject = new Subject<any>(); <- creo un Subject
+  
+ constructor() { }
+
+ toggleAddTask(): void {
+  this.showAddTask = !this.showAddTask;
+  this.subject.next(this.showAddTask); <- almaceno valores
+ }
+
+* me falta pasarlo a un Observable
+ onToggle():Observable<any>{
+   return this.subject.asObservable();
+ }
+}
+* Para usarlo fijate que onToggle es un Observable al que me puedo subscribir.Necesitaré la clase Subscription de rxjs para ello,ya que es un custom Observable:
+
+import { Subscription } from 'rxjs';
+import { UiService } from 'src/app/services/ui.service';
+
+@Component({
+  selector: 'app-header',
+  templateUrl: './header.component.html',
+  styleUrls: ['./header.component.css']
+})
+export class HeaderComponent implements OnInit {
+
+  public title: string="Task Tracer";
+  showAddTask:boolean = false;
+  subscription!:Subscription; <- creo una propiedad de tipo Subscription
+
+  *Me subscribo a mi Observable en el constructor porque quiero que para cuando se cree este componente ya haya un valor(puede ser en cualquier zona??)
+  constructor(
+    private uiService: UiService) {
+      this.subscription = this.uiService.onToggle()
+      .subscribe( value => {
+        this.showAddTask = value;
+      })
+     }
+
+NOTA:fijate como se usa un ternario en Angular "{{}}"(dobles llaves y entre comillas dobles las llaves):
+ color="{{showAddTask ? 'red': 'green'}}"
+ name="{{ name ? 'juan' : 'paca'}} <- necesito las dobles por fuera para poder usar las simples por dentro.
+
+Fijate como subscribiendome al cambio de un botón que cada click haga toggle en una propiedad boleana al final termino mostrando condicionalmente el formulario aparte de cambiando el texto y el color del boton:
+
+*En el componente que es el formulario para AddTask...
+export class AddTaskComponent implements OnInit {
+  
+  @Output() onAddTask:EventEmitter<Task> = new EventEmitter();
+  text: string="";
+  day: string="";
+  reminder:boolean = false;
+  showAddTask!:boolean;
+  subscription!:Subscription;
+
+  constructor(private uiService: UiService) { 
+    this.subscription = this.uiService
+    .onToggle()
+    .subscribe((value:boolean) => this.showAddTask = value)
+  }
+
+<form *ngIf="showAddTask"...
+
+Fijate como me tuve que traer otra Subscription de nuevo,y el servicio que llama a mi custom Observable(el cual lo hice gracias a SubjectInstance.asObservable() y lo alimenté con SubjectInstance.next() <- igual que en React)
+
+Fijate como él no ha creado otro archivo para las rutas.Realmente sólo hay que pasarle al modulo en su método forRoot un array de Routes:
+
+* Defino ese array(realmente no tengo porque crear un app.routing.ts)
+
+const appRoutes: Routes = [
+  { path: '', component:TasksComponent }
+]
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    HeaderComponent,
+    ButtonComponent,
+    TasksComponent,
+    TaskItemComponent,
+    AddTaskComponent
+  ],
+  imports: [
+    BrowserModule,
+    FontAwesomeModule,
+    HttpClientModule,
+    FormsModule,
+    RouterModule.forRoot(appRoutes,{enableTracing:true}) <- y se las paso al RouterModule hacia la app.Fijate en el uso de enableTracing a true para ayudar con el debug 
+
+Recuerda que en Angular debo usar la propiedad routerLink en vez de ref para que no haga el refresh:
+
+<div class="">
+   <h2>Task Tracker</h2>
+   <h4>Version 1.0.0</h4>
+   <a routerLink="/">Go Back</a>
+</div>
+* Pero si que puedo usar una <anchor> en Angular!
+
+Por último vamos a ocultar o mostrar elementos en base a qué ruta me encuentre.Esto es muy interesante ya que mostraré u ocultaré cualquier pieza de interfaz:
+
+* Y sólo necesito la propiedad url del Router de Angular
+  hasRoute(route: string): boolean {
+    return this.router.url === route
+  }
+* Al devolverme un boolean encaja perfectamente con un ngI
+ <app-button *ngIf="hasRoute('/')" <- recuerda que *ngIf lleva el asterisco(creo que representaba doble enlace).Y dado que no quiero mostrarlo si estoy en /about solo lo muestro si estoy en /.Interesantísimo.
+
+ Si bien Angular es más dificil es porque es más estricto y robusto.Esto también es el motivo porque empresarialmente es muy usado.
+ Es una buena elección en cuanto a grandes proyectos,ya que ayuda a ser organizado en todo el proyecto,mientras que React y Vue dan mucha más libertad,también son una posible mejor elección en proyectos de menor escala

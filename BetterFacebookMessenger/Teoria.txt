@@ -1,0 +1,142 @@
+          BETTER FACEBOOK MESSENGER CHAT APP by Javascript Mastery
+
+Source: https://www.youtube.com/watch?v=Bv9Js3QLOLY
+
+Starter repo:  git clone --single-branch -b master https://github.com/adrianhajdin/unichat-course.git .
+
+Si analizo las dependencias del proyecto veré modulos para AntDesign ,axios y firebase y la más importante 'react-chat-engine'.
+
+Creo una zona de Login con Google y Facebook(me traigo sus iconos y creo dos botones) y ya puedo enlazar Firebase
+
+Importante: voy a ver que es Firebase Hosting.Me pide Firebase CLI para alojar mi sitio:
+npm install -g firebase-tools
+Una vez tenga la CLI de Firebase disponible puedo hacer login,init o deploy:
+
+1- Acceder a Google
+> firebase login
+
+2- Inicia el proyecto
+Ejecuta el siguiente comando en el directorio raíz de tu app:
+> firebase init
+
+3- Cuando estés listo, implementa tu app web
+Ubica los archivos estáticos (p. ej., HTML, CSS y JS) en el directorio de implementación de tu app (el directorio predeterminado es “public”). Luego, ejecuta este comando desde el directorio raíz de la app:
+> firebase deploy
+Después de la implementación, consulta tu app en unichat-b4896.web.app.
+
+¿Necesitas ayuda? Consulta los documentos de Hosting.
+
+IMPORTANTE: el código que necesito agregar está en configuración del proyecto:
+
+const firebaseConfig = {
+  apiKey: "",
+  authDomain: "unichat-b4896.firebaseapp.com",
+  projectId: "unichat-b4896",
+  storageBucket: "unichat-b4896.appspot.com",
+  messagingSenderId: "",
+  appId: ""
+};
+
+Sin embargo va a quedar asi en React:
+
+import firebase from 'firebase/app';
+import "firebase/auth";
+
+export const auth = firebase.initializeApp({
+  apiKey: "AIzaSyDycwKRGtEZaTFynwrl_NpWs_5TITIppOg",
+  authDomain: "unichat-b4896.firebaseapp.com",
+  projectId: "unichat-b4896",
+  storageBucket: "unichat-b4896.appspot.com",
+  messagingSenderId: "38715887590",
+  appId: "1:38715887590:web:5e438e2d268d273a209027"
+}).auth();
+
+Con esto puedo usar la auth de Firebase(fijate que depende un poco de lo que voy a hacer con Firebase)
+Ahora tengo que activar la autenticacion en firebase para google y facebook(en Authentication están todas en disabled)
+La activo y me dará un projectId y me pedirá un project-support-email(puede ser cualquiera random) 
+Puedo ver que activar Google fue realmente sencillo! ESto es porque Firebase es de Google.
+
+Para activar Facebook es un poco diferente.Tengo que ir a https://developers.facebook.com y arriba busco MyApps(hay que registrarse).
+No tendré ninguna,pero puedo crear una.
+Con darle permisos de Login es suficiente(Consumer type)
+Despues me dirá qué quiero agregar.Solo quiero agregar el Login.
+Añado una URL y no quiero su código,ya que estoy usando Firebase.
+Aún me pedirá una OAuth redirect URI válida,justo me la está ofreciendo Firebase.La copio de Firebase y pego en Developers.facebook
+Doy en guardar y despues voy a Settings/Basic y alli tengo que copiar el AppId y el AppSecret(fijate que me los está pidiendo la Auth de Firebase)
+Asi pues simplemente copio y pego
+
+            TESTEANDO LA AUTH DE FIREBASE
+
+Hay que traerse el modulo firebase/app y la variable auth que declaré en el firebase.js en el Login:
+
+import "firebase/app";
+import { auth } from "../firebase";
+
+En el onClick de los botones llamo a estos métodos(fijate que hay muchos):
+   <div 
+      className="login-button google"
+      onClick={() => auth.signInWithRedirect( new firebase.auth.GoogleAuthProvider())}
+   >
+     <GoogleOutlined style={{marginRight:3}}/>
+      Sign in With Google
+   </div>
+   <br /> <br />
+   
+   <div 
+     className="login-button facebook"
+     onClick={() => auth.signInWithRedirect( new firebase.auth.FacebookAuthProvider())}
+   >
+
+Parece que esto es suficiente para hacer el login.Pero para ver algo necesitamos la APIContext.
+Fijate como ha creado lógica que se dispara en cada cambio de URL,lo cual es interesantisimo:
+
+const history= useHistory();
+
+useEffect( () => {
+  ..code
+},[history]) 
+* Cada vez que el usuario cambie de URL cambia el history asi que se dispara.Fijate que está en un useEffect en un Contexto abrazando toda la app.luego hay visión global
+
+Fijate también como podría crear ya un spinner o loader y mostrarlo fullWidth:
+<XXXContext.Provider value={{things to share}}>
+{ !loading && children}
+{loading && <MySpinner}
+</XXXContext.Provider>
+Aunque quizas sea un poco agresivo,puede ser buena idea,sobre todo en una pantalla móvil
+
+Fijate que siempre me traigo firebase de firebase/app:
+import firebase from 'firebase/app';
+
+              CHAT-ENGINE
+
+Para crear este chat usaremos ChatEngine que nos proporciona un chat ya(hay varios planes).
+Fijate que parece importante el "."
+   <ChatEngine 
+      height="calc(100vh - 66px)"
+      projectID="ae69d953-5def-4d3a-831c-9deeeb1e524e"
+      userName="."
+      userSecret="."
+      />       
+Su web es https://chatengine.io
+
+Fijate como vamos a necesitar una funcion que se le pase una URL con una imagen y le haga fetch a esa URL y reconstruya la imagen con new File([data],name,type):
+
+  const getFile = async (url) => {
+      const response = await fetch(url);
+      const data = await response.blob();
+
+      return new File([data],"userPhoto.jpg",{type:'image/jpeg'})
+  }
+
+REcuerda que esto es una Promesa asi que tengo que llamarla como tal:
+
+getFile(user.photoUrl).then( (avatar) => {
+  formdata.append("avatar",...)
+})
+
+Por último puedo hacer el deploy en Netlify.Fijate que simplemente tengo que arrastrar los build o dist de React o Angular ,y que además le puedo dar un mejor nombre a la app.
+Tendré que agregar el dominio a Firebase para que siga funcionando la auth.
+
+Resumen: no es difícil agregar autenticacion con Google usando Firebase,de echo son 5 minutos.Fijate que fácil es pasar una imagen en una url a un File e imprimirlo en la UI.
+Fijate que fácil es poder usar funcionalidad en cada cambio de ruta metiendo history en un efecto en el contexto.Si bien no parece que el chat me vaya a servir porque le voy a poner webcam si que me vale tanto el listener en cada ruta como la auth por Google y quizas adjuntar una imagen.Seguir por el chat más largo y/o salas(el largo ya tiene salas también)
+y probar ahora el listener

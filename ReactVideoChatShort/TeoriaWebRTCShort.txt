@@ -1,0 +1,19 @@
+                  ReactJs WebRTC Video Chat App
+
+Source: https://www.youtube.com/watch?v=gnM3Ld6_upE
+
+PARTE SERVER:
+
+En el servidor(raiz del proyecto tal como está éste) instalo:
+>npm i express nodemon socket.io
+Esto creará la carpeta node_modules tal como él ha desarrollado esto.
+Recuerda que hay que abrir las cors en los servers desde hace tiempo.
+
+PARTE FRONT:
+
+En el cliente hay que instalar estas dependencies:
+npm i simple-peer socket.io-client @material-ui/core @material-ui/icons react-copy-to-clipboard
+
+react-copy-to-clipboard la usaré para pasar el socket.id de un usuario a otro mientras que simple-peer es la libreria encargada de la conexion de audio y video entre máquinas.
+
+Parece que si quiero volver a llamar al mismo usuario no puedo(alguien dice que hay que resetear connectionRef al valor por defecto y no usar destroY())Investigar más sobre WebRTC

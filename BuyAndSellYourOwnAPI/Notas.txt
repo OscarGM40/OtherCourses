@@ -1,0 +1,5 @@
+      BUILD AND SELL YOUR OWN API(IN RAPID-API MARKETPLACE)
+
+Fuente: https://www.youtube.com/watch?v=GK4Pl-GmPHk
+
+Vamos a usar 'cheerio',que es un modulo npm que sirve para scrapear webs con una sintaxis parecida a JSX y jQuery

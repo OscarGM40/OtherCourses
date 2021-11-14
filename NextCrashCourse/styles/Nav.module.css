@@ -1,0 +1,40 @@
+
+
+.nav {
+   height: 50px;
+   padding: 10px;
+   color: #fff;
+   display: flex;
+   align-items: center;
+   justify-content: flex-start;
+   animation: navbarBackground 4s;
+   animation-fill-mode: forwards;
+}
+
+.nav ul {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   list-style: none;
+}
+ 
+.nav a {
+   margin: 5px 15px;
+   font-size: 18px;
+   text-shadow: 2px 2px 10px rgba(224, 7, 7, 0.411);
+   transition: text-shadow .4s;
+} 
+.nav a:hover {
+   text-shadow: 4px 4px 25px rgb(241, 0, 0);
+
+}
+
+@keyframes navbarBackground {
+   from{
+      background-color: #000000;
+   }
+   to{
+      background-color: slateblue;
+   }
+   
+}

@@ -1,0 +1,94 @@
+Aprovecharé para aprender a descargarme el código fuente de Bootstrap en scss y usar un preprocesador y compilarlo yo.
+Fijate que para poder compilarlo necesito instalar Sass en mi sistema operativo de turno.Se instala de manera global con npm:
+>npm i -g sass
+Puedo ver la version con sass --version (deberia ver algo de dart)
+
+Bien,con sass preparado para compilar voy a su web y me bajo el codigo fuente.Lo descomprimo y sólo necesito las carpetas dist (que tienen en css y el js) y la carpeta scss( donde esta todo el código en .scss).Es esta última carpeta la más importante ya que puedo tocar sus archivos .scss y despues compilarlo(siempre sale al bootstrap.scss | bootstrap.css).
+En cuanto al index.html debe estar enlazado a dist/css/bootstrap.css (lógico,ya que voy a compilar aqui y es el resultado el que quiero)Los otros archivos parece que puedo incluso borrarlos.
+
+<link rel="stylesheet" href="dist/css/bootstrap.css">
+
+también dejo el compilador activado desde una cli:
+>sass --watch scss:dist/css
+* Fijate que es origen:destino y que el destino es dist/css 
+no dist a secas,y la flag es necesaria para el enabled.
+
+Fijate como puedo crear un boton que oculte un div en otro lado del html:
+<button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#target">
+<span class="navbar-toggler-icon"></span>
+</button>
+* Incluso me dan una clase para crear el menu hamburguesa.Esa propiedad data-bs-target debe coincidir su valor con el de el id del elemento a ocultar:
+
+<div class="collapse navbar-collapse" id="target">
+* Puede que hasta funcione xd.
+
+La clase img-fluid para imagenes hace que la imagen quepa en el contenedor donde se halle.Es vital,ya que ademas la hace responsiva.Fijate que puedo hacer un poco más pequeña la imagen bajandole el width:
+<img src="http://..." class="img-fluid w-75">
+* Bajarla el width la bajará también el height,se va a comportar responsiva por la clase anterior img-fluid(interesante,asinto!)
+
+Fijate que realmente no quiero que flex esté activo en moviles o pantallas pequeñas(no activarlo implica poner todo en columna).Esto es realmente importante.Si uso d-md-flex se pondrá en flex desde md,si uso d-sm-flex desde small.
+
+<div class="d-md-flex> <- Realmente podria cambiar a flex-column,pero ya con este me vale,para que complicarse.
+
+Siempre que quiera un texto de un color puedo usar las clases text-danger text-warning,etc...
+<h1>Este texto <span class="text-danger"> es rojo</span></h1>
+
+Tambien puedo hacer un texto un poco más grande con la clase lead(fijate que lead es lider,encabezar,etc...)
+<p class="lead">lorem4</p> <- este texto va a ser un poco mas pequeño.No confundir con la clase text-muted
+
+Dado que Traversy quiere que los textos se alineen a la izquierda en pantallas medias y grandes,pero que esten centrados en moviles puedo usar clases como 'text-sm-start',que alineara el texto a la izquierda desde 'sm' y acompañarla de text-center, 
+
+<section class"text-ligth text-center text-md-start>
+* Fijate que siempre que pongo un breakpoint significa 'desde este breakpoint y todos los superiores'.Asi que desde md me va a alinear todo a la izquierda.
+
+Dado que no estoy con MDB no puedo usar alguna clase suya como hidden-xs(tampoco llegué a dominarla).Pero puedo ocultar cualquier cosa con d-none y mostrarla con d-md-block.Esta conjunción ocultará en xs y sm y mostrará desde md este elemento.
+<img class="img-fluid w-50 d-none d-md-block> <- desde md se verá.
+Podria hacer lo contrario
+<img class="img-fluid w-50 d-md-none"> <- desde md lo ocultas, y como por defecto se ve para xs y sm se verá.Claro que normalmente se ocultan las cosas para moviles,en vez de mostrarse peazo prehistoric
+
+En cuanto a una row y sus columnas de nuevo querré que por ejemplo la columna abarque las 12 en small(o sea que no haya columnas).Esto lo consigo con col-md-3(dado que no le he dicho que hacer en small y xs no se va a poner en columna,abarcando toda la fila).Es lo mismo que poner col-md-3 junto a col-sm-12.
+Recuerda que puedo decir desde donde SI quiero que haga algo.
+
+  <div class="container-fluid">
+        <div class="row">
+          <div class="col-md"></div>
+          <div class="col-md"></div>
+          <div class="col-md"></div>
+   </div>
+*Recuerda que la row debe estar en un container y fijate que al poner col-md es como si pusiera col-md-4 y si bajo de md van a ser simples div(por eso se pondran en direccion column,porque son 3 divs)
+
+En Bootstrap 3 habia iconos,pero los quitaron en el 4.Ahora han vuelto en la version 5.
+Para usarlos hay que usar la CDN para iconos(esta en su doc oficial,debajo de la muestra de iconos)
+Las clases para usarlos son 'bi' (de bootstrap icon) y 'bi-name'.Recuerda que van en una tag <i></i> Por ejemplo:
+<i class="bi bi-laptop".
+
+En Bootstrap puedo usar las etiquetas headings(h1,h2,h3..) como clases(creo que solo para clases de un div).
+<div class="h1>
+  <i class"bi bi-home>
+</div> <- asi veré grande al icono
+
+En cuanto a tarjetas Bootstrap ofrece muchas clases: card a secas para definir la card; card-body,card-footer y card-header para seccionar la card.CArd-image card-text card-title... para definir elementos y categorizarlos.
+
+Para pegar la navbar al top se usa la clase 'fixed-top'.Sin embargo,esto liberará todo su height,teniendo que empujar al siguiente elemento toda esa altura como padding-top(como mi app social).
+Puedo arreglar esto con el pseudoselector ::before en el body.Siempre que use los pseudoselectores ::before o ::after estoy obligado a usar la propiedad css 'content'.Además lo tengo que poner en display block para que coga cuerpo o altura:
+
+body::before {
+  display:block;
+  content:'';
+  height:60px;
+}
+
+Esto va a crear un elemento 'fantasma' de 60px antes de que empiece el body,que justo es lo que necesito meter debajo de la navbar para que empuje todo el documento
+
+Fijate como puedo pasar un color a un icono,no tengo porque quedarme con el color que traiga:
+Simplemente como es texto,uso text-color
+<i class="bi bi-twitter text-dark mx-1"></i>
+
+Fijate como para crear un modal tengo que pasarle los atributos data-bs-toggle y data-bs-modal="#id" a un boton:
+  <button class="btn btn-primary btn-lg" 
+    data-bs-toggle="modal"
+    data-bs-target="#enroll">
+  Start the Enrollment</button>
+
+Al final lo importante ha sido las pseudoclases ::before y after(que obligan a la propiedad css content,la cual puede ir vacia) y que debo usar las clases para breakpoints en los d-flex,paddings o margins o incluso en alineaciones como (text-center + text-md-start)
+Obviamente me queda mucho por aprender y mejorar pero este es el camino

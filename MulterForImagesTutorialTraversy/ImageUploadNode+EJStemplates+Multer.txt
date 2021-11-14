@@ -1,0 +1,157 @@
+	NODE IMAGE UPLOADING WITH MULTER AND EJS TEMPLATE AND MATERIALIZE
+
+* By TraversY media
+Source: https://www.youtube.com/watch?v=9Qzmri1WaaE
+
+Subir archivos e imágenes es una parte importante del desarrollo de aplicaciones.Vamos a ver el módulo Multer,probablemente el más popular.
+La documentación no es muy completa.
+Haremos un pequeño proyecto con Materialize UI y EJS como template engine(Embebed javascript)
+
+Usaremos feedback de errores.Empecemos:
+
+>npm init
+>npm i express ejs multer
+* Usaremos ejs porque se configura muy fácil
+
+Cambio el script start:
+"start":"node index.js"
+Instalo globalmente nodemon(ya lo tengo)
+
+Creo ese archivo index.js.
+
+* En el index.js
+const express = require('express');
+const multer = require('multer');
+cons ejs = require('ejs');
+cons path = require('path');
+
+//Init our app
+const app = express();
+
+// configure EJS.EJS se configura en una línea
+app.set('view engine','ejs')
+
+// Public Folder
+app.use(express.static('./public')
+
+// rutas para EJS(las coge del folder views automáticamente)
+app.get('/', (req,res) => res.render('index'));
+* Asi pues creo el folder views y el archivo views/index.ejs
+
+app.listen(3000, () => console.log('server on port 3000'));
+
+
+Ya puedo escribir HTML en la template del servidor.Vamos a usar materialize asi que voy a materializecss.com y me traigo las CDNS .Materialize necesita de Ajax asi que las CDNS serán:
+en el head la CDN para el CSS
+en el body la CDN para Ajax,despues la CDN para el materialize JS
+ 
+* Fijate en la sintaxis de ejs y en que las clases ya le están dando el tipico estilo materialize.
+
+  <body>
+    <div class="container">
+      <h1>File Upload</h1>
+      <%= typeof msg != 'undefined' ? msg : '' %>
+      <form action="/upload" method="post" enctype="multipart/form-data">
+        <div class="file-field input-field">
+          <div class="btn grey">
+            <span>File</span>
+            <input type="file" name="myImage" id="" />
+          </div>
+          <div class="file-path-wrapper">
+            <input type="text" class="file-path validate" />
+          </div>
+        </div>
+        <button type="submit" class="btn">Submit</button>
+      </form>
+    </div>
+
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"
+    ></script>
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  </body>
+
+					MULTER
+
+PASOS_
+1- crear el Storage
+2- crear una instancia de multer con ese storage por argumento
+3.
+
+PASO 1
+EMpezemos con multer.Necesitamos especificar el Storage Engine(hay varias formas de hacer esto):
+const storage = multer.diskStorage({
+  destination: './public/uploads/', <- ojo con el ending slash
+  filename: function(req,file,cb){
+    cb(null,file.fieldname+'-'+Date.now()+path.extname(file.originalname))
+}
+})
+* diskStorage es un objeto con dos propiedades(destination y filename).Destination es un string con la ruta de destino y filename es un middlewaare,una funcion con los argumentos req,file y callback.Devuelve la callback con el error y el nombre del archivo.El error se pone a null
+Fijate que él construye el timestamp en el servidor,pues solo tiene una aplicacion de servidor.Usará path.extname(file) para sacar la extensión.El método path.extname recibe un file por argumento y devuelve su extensión
+
+PASO 2 Lo normal es usar limites.Para ello se usa la propiedad 'limits' que recibe un objeto.En él puedo especificar el fileSize en bytes(1.000.000 para 1MB)
+
+const upload = multer( { 
+  storage:storage,
+  limits:{
+    fileSize: 10000000
+   },
+fileFilter: function(req,file,cb){
+   checkFileType(file,cb);
+  }
+ } ).single('myImage');
+* 
+
+Ahora creo la ruta para el formulario con la imagen. 
+app.post('/upload',(req,res) => {
+  upload(req,res,(error) => {
+    if(error) console.log(error)
+    
+  }
+})
+* Si quiero que sólo se pueda subir imágenes hay que realizar más pasosEsto se hace en la propiedad fileFilter y crearemos nuestra propia función para ella.
+
+* hay que mirar la extensión y el MimeType porque se puede renombrar una extensión pero no se puede cambiar el MimeType
+function checkFileType(file,cb) {
+  //Allowed ext
+  const filetypes= /jpeg|jpg|png|gif/;
+  // we check the extension
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+// check the mime
+const mimetype = filetypes.test(file.mimetype);
+
+if(mimetype && extname){
+  return cb(null,true);
+} else {
+  cb("error: images only)
+
+
+Por último puedo enviar la imagen de vuelta en la respuesta.Fijate en que necesitaré mandar cosas en la respuesta,es el way to go.
+
+app.post('/upload2',(req, res) => {
+   upload(req,res, (err) => {
+      if(err) {
+         res.render('index',{ msg:err })
+      }else {
+         if(req.file == undefined) {
+            res.render('index',{ msg:"Error: no File Selected" })
+
+         }else {
+            res.render('index',{ msg:"Image uploaded", 
+            file:`uploads/${req.file.filename}})`
+         }
+      }
+   })
+}
+
+Mando simplemente mi propiedad con la ruta: `uploads/${req.file.filename}` Fijate que entra al folder definido en express.static() automáticamente.
+Solo queda mostrarla en el HTML.
+
+Puedo tratar de implementar esto en mi proyecto,además de implementar materialize.css.
+Investigar sobre reutilizar el upload sin usar single('file').
+
+
+

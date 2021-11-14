@@ -1,0 +1,23 @@
+{
+  "tasks": [
+    {
+      "id": "2",
+      "text": "Meeting at School",
+      "day": "May 6th at 1:30pm",
+      "reminder": false
+    },
+    {
+      "text": "Test task",
+      "day": "May 7th 8:00 pm",
+      "reminder": true,
+      "id": "ozaanJH"
+    },
+    {
+      "text": "Pasear al Perro",
+      "day": "Hoy 7:00pm",
+      "reminder": false,
+      "id": "YCoLR8d"
+    }
+  ],
+  "products": []
+}

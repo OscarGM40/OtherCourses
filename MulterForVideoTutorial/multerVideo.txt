@@ -1,0 +1,127 @@
+				FILE AND VIDEO UPLOAD WITH MULTER
+
+Source: https://www.bacancytechnology.com/blog/file-upload-using-multer-with-nodejs-and-express
+
+Subir archivos es la operación más básica para cualquier aplicación.Usando Node+Express y la libreria Multer se puede implementar fácilmente.
+Veré como subir archivos,imágenes(una o varias) y videos.
+
+			INITIAL SETUP
+
+Empiezo creando un servidor express:
+const express = require('express');
+const path = require('path');
+const app = express()
+const port = process.env.PORT || 3000
+app.get(‘/’, (req, res) => { 
+    res.send(‘Hello People’); 
+});
+app.listen(port, () => {
+    console.log('Server is up on port ' + port);
+})
+
+				AÑADIR MULTER
+
+Añado la libreria:
+const multer = require(‘multer’);
+
+	PASO 1- MULTER  STORAGE FOR SINGLE IMAGE UPLOAD
+
+Lo siguiente a implementar es definir la localización del storage para los archivos.Multer permite almacenarlos en el disco duro del host.
+
+* Creo un directorio 'images' en la raiz del proyecto.:
+const imageStorage = multer.diskStorage({
+    // Destination to store image     
+    destination: 'images', <- no va a funcionar asi en Linux,ojo que no es /images sino images
+      filename: (req, file, cb) => {
+          cb(null, file.fieldname + '_' + Date.now() 
+             + path.extname(file.originalname))
+            // file.fieldname is name of the field (image)
+            // path.extname get the uploaded file extension
+    }
+});
+
+1-destination: se usa para que la aplicación sepa donde almacenar las imagenes.Puede ser un string.Cuando use 'destination' como una funcion(aqui fue como un string) es obligatorio crear el directorio.
+Si es un string multer creará el directorio
+
+2-prop filename: es un middleware,determina qué archivo debe crear en el direcorio ya proporcionado.Si no proveo el filename se creará un random file sin extensión.
+EL middleware toma 3 argumentos(el objeto request,el objeto file,y una callback.Los dos argumentos de la callback son:
+  - null- para el error
+  - file.originalname: aqui usaré el mismo nombre con el que se subió.Puedo elegir cualquiera.
+
+			PASO 2 CREAR EL MIDDLEWARE
+
+Con el storage de mi elección creo el middleware con el método constructor multer:
+const imageUpload = multer({
+      storage: imageStorage,
+      limits: {
+        fileSize: 1000000 // 1000000 Bytes = 1 MB
+      },
+      fileFilter(req, file, cb) {
+        if (!file.originalname.match(/\.(png|jpg)$/)) { 
+           // upload only png and jpg format
+           return cb(new Error('Please upload a Image'))
+         }
+       cb(undefined, true)
+    }
+}) 
+* Como puedo apreciar le pasé el almacén anterior y un par de filtros(!MB máx y sólo png o jpg.
+El método multer({}) toma un objeto con las propiedades storage,limits o el middleware fileFilter(req,file, cb).Las 3 son auto-explicativas.
+
+		PASO 3 CREAR UN ENDPOINT PARA LA SUBIDA A ESTE ALMACEN
+
+El paso siguiente es crear un endpoint:
+
+// For Single image upload
+app.post('/uploadImage', imageUpload.single('image'), (req, res) => {
+     res.send(req.file)
+}, (error, req, res, next) => {
+     res.status(400).send({ error: error.message })
+})
+
+			PASO 4 SUBIDA DE MULTIPLES IMAGENES
+
+Para subir múltiples imágenes multer provee la funcion llamada arrays(fieldname,[max_count]) que toma un array de archivos o files,todos con el nombre fieldname.
+Generará un error en caso de que quiera subir más del valor que le dé a  max_count.
+El array de archivos se guardará en req.files(en vez de req.file como la vez anterior).No hay necesidad de crear otro storage tal como tengo el código.
+
+// For multiple image upload
+app.post('/uploadBulkImage', imageUpload.array('images', 4),     (req, res) => {
+   res.send(req.files)
+}, (error, req, res, next) => {
+    res.status(400).send({ error: error.message })
+})
+* Nota: recuerda que al testear en Postman en el body es form-data y la key será image o images de tipo file(para subir varios multiplica la key images de tipo file) 
+
+					PASO 6 SUBIR VIDEOS CON MULTER
+
+Para subir videos hay que crear otro storage:
+
+const videoStorage = multer.diskStorage({
+     destination: 'videos', // Destination to store video 
+     filename: (req, file, cb) => {
+         cb(null, file.fieldname + '_' + Date.now() 
+          + path.extname(file.originalname))
+     }
+});
+De nuevo creo el middleware con el método multer pasandole el anterior storage,las limitaciones y el filter:
+const videoUpload = multer({
+     storage: videoStorage,
+     limits: {
+     fileSize: 10000000 // 10000000 Bytes = 10 MB
+     },
+     fileFilter(req, file, cb) {
+       // upload only mp4 and mkv format
+       if (!file.originalname.match(/\.(mp4|MPEG-4|mkv)$/)) { 
+          return cb(new Error('Please upload a video'))
+       }
+       cb(undefined, true)
+    }
+})
+* Por último creo el endpoint para subir videos:
+app.post('/uploadVideo', videoUpload.single('video'), (req, res) => {
+   res.send(req.file)
+}, (error, req, res, next) => {
+    res.status(400).send({ error: error.message })
+})
+
+* Como puedo ver subir una imagen,varias o un video es realmente sencillo.

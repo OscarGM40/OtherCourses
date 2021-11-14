@@ -1,0 +1,201 @@
+				REACT ADMIN DASHBOARD PANEL
+
+Source: https://www.youtube.com/watch?v=aTPkos3LKi8&t=108s
+
+VAmos a usar Material Icons para los iconos y Recharts para las gráficas.
+También vamos a usar una DataTable de Material asi que necesito el core también
+>npm install @material-ui/icons
+>npm install @material-ui/core
+>npm install recharts
+
+Para la fuente usaré Source Sans Pro 
+
+Fijate que si fija la altura de un div padre en 50px y al hijo le dice que tenga height:100% ese height son 50 pixeles()
+
+.topbar {
+   width: 100%;
+   height: 50px;
+   background-color: #fff;
+}
+
+.topbarWrapper {
+   height: 100%;
+   padding: 0px 20px;
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+}
+
+NOTA: poner algo en absolute implica que tengo que poner al padre en relative!!!
+
+Fijate como para mover los badge simplemente los define en un span que pondrá en posición absoluta y ese span lo mete en un div que pondrá en relativa.La clave es el span que es inline dentro de un div que es block.
+El span lo mueve un poco y siempre estará situado perfecto en la misma posición respecto a ese div.Este trick me lo quedo:
+
+<div className="topRight">
+   <div className="topbarIconContainer">
+           <Settings />
+       <span className="topIconBadge">2</span> <-absoluta
+  </div> <- relativa
+* No solo eso sino que el div exterior que contiene a los 3 div con iconos lo pongo en flex y asi los dejo centrados a los iconos.  
+
+Para que la barra no haga scroll la pongo en sticky:
+.topbar {
+   width: 100%;
+   height: 50px;
+   background-color: rgb(245, 192, 192);
+   position: sticky;
+   top: 0;
+   z-index:999;
+}
+Con z-index me aseguro que estará arriba ella siempre(fijate que sticky la ha sacado también del flujo,igual que absolute asi que puedo mover la caja.Fijate como css es más profundo de lo que parece.
+
+Para crear un avatar acuerdate de border-radius:50%
+.topAvatar {
+   width: 30px;
+   height: 30px;
+   border-radius: 50%;
+   cursor: pointer;
+} <- no hay más macho :(
+
+Para fijar la altura recuerda que es el view height y no el porcentaje:
+
+.sidebar {
+   flex: 1;
+   height:calc(100vh - 50px); <- el sidebar que sea toda la vista menos los 50px del topbar.
+
+Las transiciones para ciertos elementos como el background es mejor especificarla en vez de usar all.
+
+   border-radius: 10px;
+   -webkit-transition: background-color 150ms linear;
+    -ms-transition: background-color 150ms linear;
+    transition: background-color 150ms linear;
+}	
+
+Fijate que la voy a usar mucho.Ni siquiera hace falta lo de los navegadores,era solo decirle transition: background-color 130ms linear;
+Fijate como para usar clases css condicionalmente le pasa una segunda clase en el HTML
+
+
+<ArrowUpward className="featuredIcon positive"/> </span>
+<ArrowDownward className="featuredIcon negative"/> </span>
+
+.featuredIcon {
+   font-size: 14px;
+   margin-left: 15px;
+   color: green;
+}
+
+.featuredIcon.positive {
+   color: red;
+}
+* Podria añadir esas clases incluso con lógica en vez de en duro.
+
+							RECHARTS
+
+Fijate lo importante que es el font-weight a la hora de crear una GUI.Fijate como puedo crear clases en React fácilmente con props:
+cont miBoton = ({tipo}) => {
+return  <Button className={"miClaseCustom "+tipo}>{tipo}</Button>
+
+<miBoton type="Approved"></miBoton>
+<miBoton type="Rejected"></miBoton>
+<miBoton type="Declined"></miBoton>
+<miBoton type="Pending"></miBoton>
+* Ni siquiera tengo que ponerle un texto ya que <miBoton> va a mostrar un <Button>{tipo}</Button> luego veré el texto Approved  | Rejected etc...
+Despues con Css puedo filtrar asi:
+.miClaseCustom.Approved { color: verde}
+-miClaseCustom.Rejected { color:rojo }
+* Esto es interesantísimo.Debería intentar hacerlo y acoplarlo a mi ćodigo.
+
+REACT ROUTER DOM
+FIJATE como la navbar y el leftbar no necesitan estar dentro del switch y como es <Route exact path="/"><Home /></Route>
+  <Router>
+      <div className="App">
+        <Topbar />
+        <div className="container">
+          <Sidebar />
+	// Las rutas solo son desde aqui.Mirar esto en el clone de facebook          
+		<Switch>
+            <Route exact path="/">
+              <Home />
+            </Route>
+            <Route path="/users">
+              <UserList />
+            </Route>
+        </Switch>
+
+        </div>
+      </div>
+    </Router>
+
+					DATA TABLES WITH MATERIAL UI
+
+Para usar tablas en Material UI tengo que instalar otro módulo(npm i @material-ui/data-grid).
+
+Tendré que pasarle los datos para las filas y las columnas.Puedo crear una columna asi:
+const columns = [ { field:"id",headerName:"ID",width:90 }, {field:"username",headerName:"Username":width:120}
+* las rows tendrán que tener estas propiedades(de momento id y username.
+
+Adicionalmente,puedo crear una columna agrupando dos o tres propiedades(por ejemplo una imagen y su nombre.Aqui un ejemplo de como creo un campo llamado "user" con el headerName de "User" y 200 de peso.Consistirá en la uníon de row.avatar y row.username(lógicamente en los datos tengo esas propiedades
+{
+      field: "user",
+      headerName: "User",
+      width: 200,
+      renderCell: (params) => {
+        return (
+          <div className="userListUser">
+            <img className="userListImg" src={params.row.avatar} alt="" />
+            {params.row.username}
+          </div>
+        );
+      },
+    },
+
+Los datos tienen esta estructura:
+
+ export const userRows = [
+    {
+      id: 1,
+      username: "Jon Snow",
+      avatar:
+        "https://images.pexels.com/photos/1152994/pexels-photo-1152994.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500",
+      email: "jon@gmail.com",
+      status: "active",
+      transaction: "$120.00",
+    },
+* Puedo ver que tengo las propiedades avatar y username,con las que formaré ese campo "user".
+
+field: "action",
+      headerName: "Action",
+      width: 150,
+      renderCell: (params) => {
+        return (
+          <>
+            <Link to={"/user/" + params.row.id}>
+              <button className="userListEdit">Edit</button>
+            </Link>
+            <DeleteOutline
+              className="userListDelete"
+              onClick={() => handleDelete(params.row.id)}
+            />
+El último campo será un Link para ir a /user/:id y el botón de delete.
+A la hora de crear la DataGrid o DataTable puedo especificar varias propiedades(ver doc) como la paginación o deshabilitar el seleccionar el checkbox al hacer click en la fila:
+   
+ <DataGrid
+    rows={data}
+    disableSelectionOnClick
+    columns={columns}
+    pageSize={10}
+    checkboxSelection
+ />
+* Puedo ver que aunque es un elemento complejo,es un componente espectacular e imprescindible a la hora de hacer un dashboard de control con su CRUD.
+
+Fijate como separa el titulo del botón en la page User simplemente englobandolos ambos en un div y con flex y space-between.tu ya sabes todo esto,puedes separar el botón Share de la otra app.
+
+Fijate que fácil que es crear un icono que tenga la funcionalidad de subir archivos:
+<label htmlFor="file"> <Publish /> </label> <- o el icono que quiera.El id y el htmlFor | for deben coincidir
+<input type="file" id="file"  style={{display:"none"/> <- la clave esta en ocultarlo y en el atributo for de las labels
+
+Recuerda que en cuanto ponga algo en flex-direction:column puedo separar en el eje Y con justify-content.Por ejemplo justify-content:space-between mandará los elementos arriba y abajo,algo que se usa mucho.Flex es Dios
+
+Fijate como puedo usar onError={ i => i.target.src = "default route" } para mostrar una imagen por defecto en React.Investigar más
+Al final pude subir un gif con ![caption](public/video/file.gif) pero no se ve perfecto.Tube que convertirlo también.Investigar más.
+

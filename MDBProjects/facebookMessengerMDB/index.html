@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <title>Facebook Messenger with MDB</title>
+  <!-- MDB icon -->
+  <link rel="icon" href="img/mdb-favicon.ico" type="image/x-icon" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css" />
+  <!-- Google Fonts Roboto -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+  <!-- MDB -->
+  <link rel="stylesheet" href="css/mdb.min.css" />
+  <style>
+    .list-group-naked .list-group-item {
+      background-color: transparent;
+      border: none;
+    }
+
+    .list-group-item-action:focus,
+    .list-group-item-action:hover {
+      background-color: #eeeeee;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <!-- start of navbar -->
+    <!-- Navbar-->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container-fluid justify-content-between">
+        <!-- Left elements -->
+        <div class="d-flex">
+          <!-- Brand -->
+          <a class="navbar-brand me-2 mb-1 d-flex align-items-center" href="#">
+            <img src="https://mdbootstrap.com/img/logo/mdb-transaprent-noshadows.png" height="20" alt="" loading="lazy"
+              style="margin-top: 2px" />
+          </a>
+
+          <!-- Search form -->
+          <form class="input-group w-auto my-auto d-none d-sm-flex">
+            <input autocomplete="off" type="search" class="form-control rounded" placeholder="Search"
+              style="min-width: 125px" />
+            <span class="input-group-text border-0 d-none d-lg-flex"><i class="fas fa-search"></i></span>
+          </form>
+        </div>
+        <!-- Left elements -->
+
+        <!-- Center elements -->
+        <ul class="navbar-nav flex-row d-none d-md-flex">
+          <li class="nav-item me-3 me-lg-1 active">
+            <a class="nav-link" href="#">
+              <span><i class="fas fa-home fa-lg"></i></span>
+              <span class="badge rounded-pill badge-notification bg-danger">1</span>
+            </a>
+          </li>
+
+          <li class="nav-item me-3 me-lg-1">
+            <a class="nav-link" href="#">
+              <span><i class="fas fa-flag fa-lg"></i></span>
+            </a>
+          </li>
+
+          <li class="nav-item me-3 me-lg-1">
+            <a class="nav-link" href="#">
+              <span><i class="fas fa-video fa-lg"></i></span>
+            </a>
+          </li>
+
+          <li class="nav-item me-3 me-lg-1">
+            <a class="nav-link" href="#">
+              <span><i class="fas fa-shopping-bag fa-lg"></i></span>
+            </a>
+          </li>
+
+          <li class="nav-item me-3 me-lg-1">
+            <a class="nav-link" href="#">
+              <span><i class="fas fa-users fa-lg"></i></span>
+              <span class="badge rounded-pill badge-notification bg-danger">2</span>
+            </a>
+          </li>
+        </ul>
+        <!-- Center elements -->
+
+        <!-- Right elements -->
+        <ul class="navbar-nav flex-row">
+          <li class="nav-item me-3 me-lg-1">
+            <a class="nav-link d-sm-flex align-items-sm-center" href="#">
+              <img src="https://mdbootstrap.com/img/new/avatars/1.jpg" class="rounded-circle" height="22" alt=""
+                loading="lazy" />
+              <strong class="d-none d-sm-block ms-1">John</strong>
+            </a>
+          </li>
+          <li class="nav-item me-3 me-lg-1">
+            <a class="nav-link" href="#">
+              <span><i class="fas fa-plus-circle fa-lg"></i></span>
+            </a>
+          </li>
+          <li class="nav-item dropdown me-3 me-lg-1">
+            <a class="nav-link dropdown-toggle hidden-arrow" href="#" id="navbarDropdownMenuLink" role="button"
+              data-mdb-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-comments fa-lg"></i>
+
+              <span class="badge rounded-pill badge-notification bg-danger">6</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+              <li>
+                <a class="dropdown-item" href="#">Some news</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">Another news</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">Something else here</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown me-3 me-lg-1">
+            <a class="nav-link dropdown-toggle hidden-arrow" href="#" id="navbarDropdownMenuLink" role="button"
+              data-mdb-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-bell fa-lg"></i>
+              <span class="badge rounded-pill badge-notification bg-danger">12</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+              <li>
+                <a class="dropdown-item" href="#">Some news</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">Another news</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">Something else here</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown me-3 me-lg-1">
+            <a class="nav-link dropdown-toggle hidden-arrow" href="#" id="navbarDropdownMenuLink" role="button"
+              data-mdb-toggle="dropdown" aria-expanded="false">
+              <i class="fas fa-chevron-circle-down fa-lg"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+              <li>
+                <a class="dropdown-item" href="#">Some news</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">Another news</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">Something else here</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <!-- Right elements -->
+      </div>
+    </nav>
+    <!-- Navbar -->
+    <!-- end of navbar -->
+  </header>
+  
+  <main>
+    <!-- tengo tres columnas -->
+    <div class="container-fluid mt-4">
+      <div class="row">
+        <!-- Left column slightly smaller than right one -->
+        
+        <div class="col-md-3 col-sm-6 order-1">
+          <section class="sticky-top" style="margin-bottom: 20px;">
+
+            <div class="d-flex justify-content-between align-items-center">
+              <p class="ms-3 my-0"><strong>Your contacts</strong></p>
+
+              <div>
+                <button type="button" class="btn btn-link btn-sm p-2" data-mdb-ripple-color="dark">
+                  <i class="fas fa-cog"></i>
+                </button>
+                <button type="button" class="btn btn-link btn-sm p-2" data-mdb-ripple-color="dark">
+                  <i class="fas fa-video"></i>
+                </button>
+                <button type="button" class="btn btn-link btn-sm p-2" data-mdb-ripple-color="dark">
+                  <i class="fas fa-edit"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="list-group list-group-naked mt-2">
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/2.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">John Doe</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/3.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">Kile Melton</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/4.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">Janelle Donaldson</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/5.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">Corrie Miles</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/6.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">Liliana Parrish</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/7.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">Ellie-Mae Berger</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/2.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">John Doe</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/3.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">Kile Melton</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/4.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">Janelle Donaldson</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/5.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">Corrie Miles</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/6.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">Liliana Parrish</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/7.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">Ellie-Mae Berger</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/2.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">John Doe</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/3.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">Kile Melton</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/4.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">Janelle Donaldson</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/5.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">Corrie Miles</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/6.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">Liliana Parrish</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/7.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">Ellie-Mae Berger</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/2.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">John Doe</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/3.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">Kile Melton</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/4.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">Janelle Donaldson</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/5.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">Corrie Miles</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/6.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">Liliana Parrish</strong>
+              </a>
+              <!-- end of list item -->
+              <!-- list item -->
+              <a href="#" class="list-group-item list-group-item-action text-reset">
+                <img src="https://mdbootstrap.com/img/new/avatars/7.jpg" alt="" class="border rounded-circle"
+                  style="height: 40px" />
+                <strong class="ms-1">Ellie-Mae Berger</strong>
+              </a>
+              <!-- end of list item -->
+       
+            </div>
+          </section>
+      </div>
+
+      <!-- End of Left column -->
+
+      <!-- Center column -->
+      <div class="col-md-6 col-sm-12 order-2 order-xs-3">
+        <!-- Section: Messages -->
+        <!-- TODO 70 px para pcs,10 para moviles -->
+        <section style="margin-bottom:70px;">
+          <div class="">
+            <img src="https://mdbootstrap.com/img/new/avatars/2.jpg" alt="" class="border rounded-circle"
+              style="height: 40px" />
+            <strong class="ms-1">John Doe</strong>
+          </div>
+          <hr />
+          <!-- Single message - other one siempre va a la izquierda-->
+          <div class="d-flex justify-content-start">
+            <img src="https://mdbootstrap.com/img/new/avatars/3.jpg" alt="" class="border rounded-circle"
+              style="height: 40px" />
+            <p class="bg-light p-3 w-75 rounded-5 ms-2">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Consequuntur harum debitis placeat qui ipsum. Minus?
+              <small class="float-end mt-4">14:52</small>
+            </p>
+          </div>
+          <!-- End of Single message - other one -->
+<!-- haz el proyecto desde 0 de multer mañana tranquilamente,hoy con el profile vale. -->
+          <!-- Single message - me Siempre voy a la derecha  -->
+          <div class="d-flex justify-content-end">
+            <p class="bg-primary text-white p-3 w-75 rounded-5 me-2">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Consequuntur harum debitis placeat qui ipsum. Minus?
+              <small class="float-end mt-4">14:53</small>
+            </p>
+            <img src="https://mdbootstrap.com/img/new/avatars/2.jpg" alt="" class="border rounded-circle"
+              style="height: 40px" />
+          </div>
+          <!-- End of Single message - me -->
+          <!-- Single message - other one siempre va a la izquierda-->
+          <div class="d-flex justify-content-start">
+            <img src="https://mdbootstrap.com/img/new/avatars/3.jpg" alt="" class="border rounded-circle"
+              style="height: 40px" />
+            <p class="bg-light p-3 w-50 rounded-5 ms-2">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Consequuntur harum debitis placeat qui ipsum. Minus?
+              <small class="float-end mt-4">14:52</small>
+            </p>
+          </div>
+          <!-- End of Single message - other one -->
+
+          <!-- Single message - me Siempre voy a la derecha  -->
+          <div class="d-flex justify-content-end">
+            <p class="bg-primary text-white p-3 w-50 rounded-5 me-2">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Consequuntur harum debitis placeat qui ipsum. Minus?
+              <small class="float-end mt-4">14:53</small>
+            </p>
+            <img src="https://mdbootstrap.com/img/new/avatars/2.jpg" alt="" class="border rounded-circle"
+              style="height: 40px" />
+          </div>
+          <!-- End of Single message - me -->
+          <!-- Single message - other one siempre va a la izquierda-->
+          <div class="d-flex justify-content-start">
+            <img src="https://mdbootstrap.com/img/new/avatars/3.jpg" alt="" class="border rounded-circle"
+              style="height: 40px" />
+            <p class="bg-light p-3 w-50 rounded-5 ms-2">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Consequuntur harum debitis placeat qui ipsum. Minus?
+              <small class="float-end mt-4">14:52</small>
+            </p>
+          </div>
+          <!-- End of Single message - other one -->
+
+          <!-- Single message - me Siempre voy a la derecha  -->
+          <div class="d-flex justify-content-end">
+            <p class="bg-primary text-white p-3 w-50 rounded-5 me-2">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Consequuntur harum debitis placeat qui ipsum. Minus?
+              <small class="float-end mt-4">14:53</small>
+            </p>
+            <img src="https://mdbootstrap.com/img/new/avatars/2.jpg" alt="" class="border rounded-circle"
+              style="height: 40px" />
+          </div>
+          <!-- End of Single message - me -->
+          <!-- Single message - other one siempre va a la izquierda-->
+          <div class="d-flex justify-content-start">
+            <img src="https://mdbootstrap.com/img/new/avatars/3.jpg" alt="" class="border rounded-circle"
+              style="height: 40px" />
+            <p class="bg-light p-3 w-50 rounded-5 ms-2">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Consequuntur harum debitis placeat qui ipsum. Minus?
+              <small class="float-end mt-4">14:52</small>
+            </p>
+          </div>
+          <!-- End of Single message - other one -->
+
+          <!-- Single message - me Siempre voy a la derecha  -->
+          <div class="d-flex justify-content-end">
+            <p class="bg-primary text-white p-3 w-50 rounded-5 me-2">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Consequuntur harum debitis placeat qui ipsum. Minus?
+              <small class="float-end mt-4">14:53</small>
+            </p>
+            <img src="https://mdbootstrap.com/img/new/avatars/2.jpg" alt="" class="border rounded-circle"
+              style="height: 40px" />
+          </div>
+          <!-- End of Single message - me -->
+          <!-- Single message - other one siempre va a la izquierda-->
+          <div class="d-flex justify-content-start">
+            <img src="https://mdbootstrap.com/img/new/avatars/3.jpg" alt="" class="border rounded-circle"
+              style="height: 40px" />
+            <p class="bg-light p-3 w-50 rounded-5 ms-2">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Consequuntur harum debitis placeat qui ipsum. Minus?
+              <small class="float-end mt-4">14:52</small>
+            </p>
+          </div>
+          <!-- End of Single message - other one -->
+
+          <!-- Single message - me Siempre voy a la derecha  -->
+          <div class="d-flex justify-content-end">
+            <p class="bg-primary text-white p-3 w-50 rounded-5 me-2">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Consequuntur harum debitis placeat qui ipsum. Minus?
+              <small class="float-end mt-4">14:53</small>
+            </p>
+            <img src="https://mdbootstrap.com/img/new/avatars/2.jpg" alt="" class="border rounded-circle"
+              style="height: 40px" />
+          </div>
+          <!-- End of Single message - me -->
+          <!-- Single message - other one siempre va a la izquierda-->
+          <div class="d-flex justify-content-start">
+            <img src="https://mdbootstrap.com/img/new/avatars/3.jpg" alt="" class="border rounded-circle"
+              style="height: 40px" />
+            <p class="bg-light p-3 w-50 rounded-5 ms-2">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Consequuntur harum debitis placeat qui ipsum. Minus?
+              <small class="float-end mt-4">14:52</small>
+            </p>
+          </div>
+          <!-- End of Single message - other one -->
+
+          <!-- Single message - me Siempre voy a la derecha  -->
+          <div class="d-flex justify-content-end">
+            <p class="bg-primary text-white p-3 w-50 rounded-5 me-2">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Consequuntur harum debitis placeat qui ipsum. Minus?
+              <small class="float-end mt-4">14:53</small>
+            </p>
+            <img src="https://mdbootstrap.com/img/new/avatars/2.jpg" alt="" class="border rounded-circle"
+              style="height: 40px" />
+          </div>
+          <!-- End of Single message - me -->
+          <!-- Single message - other one siempre va a la izquierda-->
+          <div class="d-flex justify-content-start">
+            <img src="https://mdbootstrap.com/img/new/avatars/3.jpg" alt="" class="border rounded-circle"
+              style="height: 40px" />
+            <p class="bg-light p-3 w-50 rounded-5 ms-2">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Consequuntur harum debitis placeat qui ipsum. Minus?
+              <small class="float-end mt-4">14:52</small>
+            </p>
+          </div>
+          <!-- End of Single message - other one -->
+
+          <!-- Single message - me Siempre voy a la derecha  -->
+          <div class="d-flex justify-content-end">
+            <p class="bg-primary text-white p-3 w-50 rounded-5 me-2">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Consequuntur harum debitis placeat qui ipsum. Minus?
+              <small class="float-end mt-4">14:53</small>
+            </p>
+            <img src="https://mdbootstrap.com/img/new/avatars/2.jpg" alt="" class="border rounded-circle"
+              style="height: 40px" />
+          </div>
+          <!-- End of Single message - me -->
+          <!-- Single message - other one siempre va a la izquierda-->
+          <div class="d-flex justify-content-start">
+            <img src="https://mdbootstrap.com/img/new/avatars/3.jpg" alt="" class="border rounded-circle"
+              style="height: 40px" />
+            <p class="bg-light p-3 w-50 rounded-5 ms-2">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Consequuntur harum debitis placeat qui ipsum. Minus?
+              <small class="float-end mt-4">14:52</small>
+            </p>
+          </div>
+          <!-- End of Single message - other one -->
+
+          <!-- Single message - me Siempre voy a la derecha  -->
+          <div class="d-flex justify-content-end">
+            <p class="bg-primary text-white p-3 w-50 rounded-5 me-2">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Consequuntur harum debitis placeat qui ipsum. Minus?
+              <small class="float-end mt-4">14:53</small>
+            </p>
+            <img src="https://mdbootstrap.com/img/new/avatars/2.jpg" alt="" class="border rounded-circle"
+              style="height: 40px" />
+          </div>
+          <!-- End of Single message - me -->
+          <!-- Single message - other one siempre va a la izquierda-->
+          <div class="d-flex justify-content-start">
+            <img src="https://mdbootstrap.com/img/new/avatars/3.jpg" alt="" class="border rounded-circle"
+              style="height: 40px" />
+            <p class="bg-light p-3 w-50 rounded-5 ms-2">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Consequuntur harum debitis placeat qui ipsum. Minus?
+              <small class="float-end mt-4">14:52</small>
+            </p>
+          </div>
+          <!-- End of Single message - other one -->
+
+          <!-- Single message - me Siempre voy a la derecha  -->
+          <div class="d-flex justify-content-end">
+            <p class="bg-primary text-white p-3 w-50 rounded-5 me-2">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Consequuntur harum debitis placeat qui ipsum. Minus?
+              <small class="float-end mt-4">14:53</small>
+            </p>
+            <img src="https://mdbootstrap.com/img/new/avatars/2.jpg" alt="" class="border rounded-circle"
+              style="height: 40px" />
+          </div>
+          <!-- End of Single message - me -->
+          <!-- Single message - other one siempre va a la izquierda-->
+          <div class="d-flex justify-content-start">
+            <img src="https://mdbootstrap.com/img/new/avatars/3.jpg" alt="" class="border rounded-circle"
+              style="height: 40px" />
+            <p class="bg-light p-3 w-50 rounded-5 ms-2">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Consequuntur harum debitis placeat qui ipsum. Minus?
+              <small class="float-end mt-4">14:52</small>
+            </p>
+          </div>
+          <!-- End of Single message - other one -->
+
+          <!-- Single message - me Siempre voy a la derecha  -->
+          <div class="d-flex justify-content-end">
+            <p class="bg-primary text-white p-3 w-50 rounded-5 me-2">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Consequuntur harum debitis placeat qui ipsum. Minus?
+              <small class="float-end mt-4">14:53</small>
+            </p>
+            <img src="https://mdbootstrap.com/img/new/avatars/2.jpg" alt="" class="border rounded-circle"
+              style="height: 40px" />
+          </div >
+          <!-- End of Single message - me -->
+        </section>
+        <!-- Sticky footer  -->
+        <section>
+          <div class="card fixed-bottom">
+            <div class="card-body">
+              <form class="d-flex">
+                <button type="button" class="btn btn-primary px-3"><i class="fas fa-plus-circle fa-lg"></i>
+                </button>
+
+                <div class="w-100 mx-2">
+                  <div class="form-outline">
+                    <textarea name="" id="" rows="1" class="form-control"></textarea>
+                  </div>
+                </div>
+
+                <button type="button" class="btn btn-primary px-3"><i class="fas fa-thumbs-up fa-lg"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+        <!-- End Sticky footer  -->
+      </div>
+      <!-- End of center column -->
+
+      <!-- Right column -->
+      <div class="col-md-3 col-xs-6 order-3 order-xs-2">
+        <section class="sticky-top">
+          <!-- Interlocutor Data - the other one -->
+          <div class="
+          d-flex
+          align-items-center
+          justify-content-center
+          flex-column
+          ">
+          <img src="https://mdbootstrap.com/img/new/avatars/2.jpg" alt="" class="rounded-circle shadow-2-strong"
+          style="height: 100px" />
+          <p class="mt-1 mb-0"><strong>John Doe</strong></p>
+          <p class="mt-0 mb-1 text-muted">Active now</p>
+        </div>
+        <hr />
+        
+        <!-- Section below the other user -->
+        <section>
+          <div class="card">
+            <div class="bg-image hover-overlay ripple" data-mdb-ripple-color="light">
+              <img src="https://mdbootstrap.com/img/new/standard/nature/111.jpg" class="img-fluid" />
+              <a href="#!">
+                <div class="mask" style="background-color: rgba(251, 251, 251, 0.15)"></div>
+              </a>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">Card title</h5>
+              <p class="card-text">
+                Some quick example text to build on the card title and make
+                up the bulk of the card's content.
+              </p>
+              <a href="#!" class="btn btn-primary">Button</a>
+            </div>
+          </div>
+        </section>
+        <!-- End of section below other user right Podria poner los activos quizas -->
+      </section>
+      </div>
+      <!-- End of Right column -->
+    </div>
+  </div>
+</main>
+
+<footer></footer>
+
+<!-- MDB -->
+<script type="text/javascript" src="js/mdb.min.js"></script>
+<!-- Custom scripts -->
+<script type="text/javascript"></script>
+</body>
+
+</html>
