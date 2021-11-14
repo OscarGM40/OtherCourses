@@ -1,0 +1,10 @@
+
+
+
+ ESTRATEGIAS DE LOGEO CON PASSPORT JS- LOGIN CON GOOGLE-FACEBOOK-GITHUB-...
+
+
+ Source: https://www.youtube.com/watch?v=7K9kDrtc4S8
+
+ Con la librería passport-js puedo usar mas de 500 estrategias de autenticación.Veamos un ejemplo con Google,Facebook y Github.
+ MINUTO 26
