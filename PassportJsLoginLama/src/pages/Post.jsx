@@ -1,8 +1,15 @@
+import { useParams } from "react-router-dom";
 import { posts } from "../helpers/dummy-data";
 
 const Post = () => {
 
-   const post = posts[2];
+const { id } = useParams();
+
+// console.log(location,'location')
+// console.log(params,'params')
+
+const post = posts[id-1]
+// const post = posts.find(post => post.id === +id)
 
    return (
       <div className="post">

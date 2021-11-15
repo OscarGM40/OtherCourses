@@ -31,8 +31,8 @@ const Login = () => {
             {/*  Fin parte izquierda*/}
 
             <div className="login__right">
-               <input type="text" placeholder="Username" />
-               <input type="text" placeholder="Password" />
+               <input type="text" placeholder="Username" className="login__input"/>
+               <input type="text" placeholder="Password" className="login__input"/>
                <button className="login__submit">Login</button>
             </div>
          </div>
