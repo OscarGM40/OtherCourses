@@ -2,6 +2,8 @@ const app = require('express')();
 const cookieSession = require('cookie-session');
 const passport = require('passport');
 const cors = require('cors');
+require('./passport')
+const authRoutes = require('./routes/auth.routes');
 
 app.use(require('express').json());
 
@@ -20,6 +22,8 @@ app.use(cors({
    methods: ['GET', 'POST', 'PUT', 'DELETE'],
    credentials: true,
 }));
+
+app.use('/auth', authRoutes);
 
 const port = process.env.PORT || 5000;
 

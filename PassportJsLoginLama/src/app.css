@@ -264,3 +264,10 @@ html {
    justify-content: center;
    text-transform: uppercase;
 }
+
+@media screen and (max-width: 1080px) {
+   .card {
+      width: 100%;
+      margin-bottom: 30px;
+   }
+}

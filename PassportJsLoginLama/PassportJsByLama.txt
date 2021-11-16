@@ -122,15 +122,24 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 
 NOTA: La estrategia de autenticacion Google usa una cuenta de Google y tokens OAuth2.0.Hay que suministrar un ClientId y un secret como options a la estrategia(al backend).La estrategia también requiere de un callbackURL.Veamoslo en un ejemplo mejor:
 
+          GOOGLE CREDENTIALS PARA UNA APP
+
 * Primero hay que ir a https://console.cloud.google.com/apis/ y buscar credentials.
 *NOTA: primero hay que configurar la pestaña inferior de consentimiento.
-Alli doy en crear Credenciales y eligo ID de Cliente de OAuth( OAuth ClientID)
-El tipo de aplicación es Web Application
-En Authorized Redirect URIs,tengo que decir a que urls voy a redirigir trás el login.Van a ser dos,una el home del frontend y otra en el backend:
-http://localhost:3000 y http://localhost:5000/auth/google/callback(puede ser otra cosa,pero PassportJS recomienda que sea /google/auth/callback) <- ya veré como se usa en el backend,asin...
- Una vez terminado doy en crear y me darán el ClientId y el secret(puedo descargarlos en un JSON)
 
-Creo la estrategia:
+Alli doy en crear Credenciales y eligo ID de Cliente de OAuth( OAuth ClientID)
+
+El tipo de aplicación es Web Application
+
+En orígenes autorizados irá el frontend(http://localhost:3000)(la pagina de login del frontend)
+
+En Authorized Redirect URIs,tengo que decir a que urls voy a redirigir trás el login.Van a ser dos,una el home del frontend( donde rediriga tras el exito) y otra la callback del backend(con el puerto del backend):
+
+http://localhost:3000 y http://localhost:5000/auth/google/callback(puede ser otra cosa,pero PassportJS recomienda que sea /auth/google/callback) <- ya veré como se usa en el backend,asin...
+
+Una vez terminado doy en crear y me darán el ClientId y el secret(puedo descargarlos en un JSON)
+
+Creo la configuración de la estrategia en un archivo js del backend(en este caso para usar Google):
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const passport = require('passport');
 
@@ -140,7 +149,7 @@ const GOOGLE_CLIENT_SECRET="..."
 passport.use(new GoogleStrategy({
       clientID: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:3000/auth/google/callback"
+      callbackURL: "/auth/google/callback"
       },
       // si todo sale bien en 'profile' esta la info del usuario 
       function(accessToken, refreshToken, profile, cb) {
@@ -167,6 +176,152 @@ Veamos que hacer con este archivo passport.js(que diría que es sólo para Googl
 
 const pasportSetup = require('./passort.js')
 
-MINUTO 51:50 creando las rutas
+Es hora de crear las rutas y añadir el middleware con una estrategia.
+NOTA: fijate que puede ir por GET lo que recoga del login del cliente,pero irá por la URL,aun así vamos a tener que recoger el login por get:
+router.get('/login') <- esta vez no va a ser por post
+
+Hay que crear un endpoint que me devolverá en la propiedad 'scope' la data que proporcione esa estrategia:
+PASO 1
+router.get('/google',passport.authenticate('google',{
+    scope:['profile','email']})) <- en profile tengo username,picture,etc...
+PASO 2: hay que decirle a donde redireccionar tanto si tiene éxito como si falla
+router.get('/google/callback', passport.authenticate('google',{ 
+   successRedirect:CLIENT_URL,
+   failureRedirect:'/login/failed'
+}))    
+PASO 3: opcional,creo esa url para el fallo
+router.get("/login/failed",(req, res) => {
+  res.status(404).json({success: false,message:"Login failed"})
+})
+
+IMPORTANTE: ahora en el frontend hay que usar window.open(url,modo) para abrir la ruta(por esto fuimos por GET) en el onclick del botón correspondiente:
+   <button type="button" className="googleButton" onClick={googleLogin}
+   const googleLogin = () => {
+      window.open('http://localhost:5000/auth/google', '_self');
+   }
+* Si ahora voy a application,y a Cookies,veré dos nuevas cookies con la información encriptada!
+
+Lo mismo tengo que hacer para el logout:
+
+* En el onclick del botón que gestione el logout:
+   const logout = () => {
+      window.open("http://localhost:5000/auth/logout", "_self");
+   }
+Fijate que puedo redireccionar desde el backend si quiero,pues cuando abra ese endpoint va a leer esta lógica:
+
+router.get('/logout',(req, res) => {
+   req.logout()
+   res.redirect(CLIENT_URL+'/login')
+})
 
 
+            ESTRATEGIA GITHUB 2
+
+Las demás estrategias son bastante más fáciles.Voy a http://www.passportjs.org/packages/passport-github2/ para ver como funciona.
+> npm install passport-github2    
+Instalo el módulo        
+
+La forma será igual,asinto(necesitaré el clienteId y el secret):
+
+const GITHUB_CLIENT_ID="...";
+const GITHUB_CLIENT_SECRET="..."
+
+passport.use(new GitHubStrategy({
+   clientID: GITHUB_CLIENT_ID,
+   clientSecret: GITHUB_CLIENT_SECRET,
+   callbackURL: "/auth/github/callback"
+ },
+ function(accessToken, refreshToken, profile, done) {
+     return done(null, profile);
+ }
+));
+
+Para conseguir el ClientId y el secret en vez de ir a cloud.console.google tengo que ir a mi Github,en Settings y Developers Settings vere la zona Oauth.Alli creo una nueva app:
+1- La homepage URL va a ser el home en el frontend,en este caso http://locahost:3000
+2- La authorization callback URL va al callback en el backend,en este caso http://localhost:5000/auth/github/callback
+Fijate que el puerto es el del back y la convencion '/auth/strategyType/callback' que se mantendrá así.Tras registrar una nueva app me dará un Client Id y debo generar el secret yo.
+
+Fijate que el efecto que me devuelve el user me vale para toda estrategia:
+
+  useEffect(() => {
+    const getUser = () => {
+      fetch('http://localhost:5000/auth/login/success', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': true,
+        }
+      })
+        .then(response => {
+          if (response.status === 200) {
+            return response.json();
+          } else {
+            throw new Error('Auth failed: ' + response.status);
+          }
+        })
+        .then(data => {
+          setUser(data.user);
+        })
+        .catch(error => {
+          console.error(error);
+        }
+        );}
+    getUser();
+  }, [])
+
+Fijate que es router.get("/github", passport.authenticate("github",{scope}) <- las opciones es un objeto como segundo argumento del método authenticate. 
+De igual manera creo los endpoints,fijate que ya es casi copiar y pegar,expecto crear el clientId y secret:
+router.get("/github", passport.authenticate("github", {
+  scope: ["profile","email"],
+}));
+
+router.get("/github/callback",
+  passport.authenticate("github", {
+    successRedirect: CLIENT_URL,
+    failureRedirect: "/login/failed",
+  })
+);
+
+ESTRATEGIA con FACEBOOK
+Con facebook voy a tener un problema,ya que no me va a dejar usar el protocolo http no seguro.De nuevo necesito un ClientId y un secret.
+
+npm install passport-facebook
+
+Creo la estrategia en el archivo de configuración de estrategias:
+const FACEBOOK_CLIENT_ID=""
+const FACEBOOK_CLIENT_SECRET=""
+
+passport.use(new FacebookStrategy({
+   clientID: FACEBOOK_CLIENT_ID,
+   clientSecret: FACEBOOK_CLIENT_SECRET,
+   callbackURL: "/auth/facebook/callback"
+ },
+ function(accessToken, refreshToken, profile, done) {
+     return done(null, profile);
+ }
+));
+
+Creo las rutas:
+router.get(
+  "/facebook",
+  passport.authenticate("facebook", {
+    scope: ["profile", "email"],
+  })
+);
+
+router.get(
+  "/facebook/callback",
+  passport.authenticate("facebook", {
+    successRedirect: CLIENT_URL,
+    failureRedirect: "/login/failed",
+  })
+);
+
+Apunto en el onclick,etc...
+   const facebookLogin = () => {
+      window.open('http://localhost:5000/auth/facebook', '_self');
+   }
+
+Puedo observar que algo que parecia complejo realmente es tremendamente simple con passport.

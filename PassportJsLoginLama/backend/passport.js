@@ -1,21 +1,53 @@
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const GitHubStrategy = require('passport-github2').Strategy;
+// const FacebookStrategy = require('passport-facebook').Strategy;
+// const TwitterStrategy = require('passport-twitter').Strategy;
 const passport = require('passport');
 
+               /* GOOGLE STRATEGY SETUP */
 const GOOGLE_CLIENT_ID="191220571886-ibr2dltqpqrqgfeq5d43c7b2iaivhu8g.apps.googleusercontent.com";
 const GOOGLE_CLIENT_SECRET="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"
 
 passport.use(new GoogleStrategy({
       clientID: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:3000/auth/google/callback"
+      callbackURL: "/auth/google/callback"
       },
       // si todo sale bien en 'profile' esta la info del usuario 
       function(accessToken, refreshToken, profile, cb) {
-         console.log(profile);
+         // console.log(profile);
          return cb(null, profile);
          }
       )
 );
+
+                        /* GITHUB STRATEGY SETUP */
+const GITHUB_CLIENT_ID="90cbb8bc7f12d3d894c8"
+const GITHUB_CLIENT_SECRET="1c69160b6ac5f9a19fe70d1cb1b515afff7294eb"
+
+passport.use(new GitHubStrategy({
+   clientID: GITHUB_CLIENT_ID,
+   clientSecret: GITHUB_CLIENT_SECRET,
+   callbackURL: "/auth/github/callback"
+ },
+ function(accessToken, refreshToken, profile, done) {
+     return done(null, profile);
+ }
+));
+
+                        /* FACEBOOK STRATEGY SETUP(only https) */
+// const FACEBOOK_CLIENT_ID=""
+// const FACEBOOK_CLIENT_SECRET=""
+
+/* passport.use(new FacebookStrategy({
+   clientID: FACEBOOK_CLIENT_ID,
+   clientSecret: FACEBOOK_CLIENT_SECRET,
+   callbackURL: "/auth/facebook/callback"
+ },
+ function(accessToken, refreshToken, profile, done) {
+     return done(null, profile);
+ }
+)); */
 
 // dado que vamos a usar sesiones debo serializar y deserializar el usuario(esto es asi simplemente porque passport no lo hace por nosotros)
 
