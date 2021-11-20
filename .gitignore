@@ -19,4 +19,6 @@ ReduxTutorialLama/node_modules
 RegisterUponActivationEmail/node_modules
 PassportJsLoginLama/node_modules
 PassportJsLoginLama/backend/node_modules
+PassportJsLoginLama/backend/.env
 TailwindCSSIntro/node_modules
+ReactCopyToClipboard/node_modules

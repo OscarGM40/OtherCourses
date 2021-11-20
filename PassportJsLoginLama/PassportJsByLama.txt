@@ -325,3 +325,29 @@ Apunto en el onclick,etc...
    }
 
 Puedo observar que algo que parecia complejo realmente es tremendamente simple con passport.
+Implementar github y facebook en la red social.
+
+          IMPLEMENTAR FACEBOOK OAUTH
+
+Source: https://www.youtube.com/watch?v=KlE9RAOl9KA
+
+Se necesita: 
+1- una cuenta de Facebook Developer
+2- una registered Facebook App con los Basic Settings configured
+
+Al crear una app eligo(for everything else)
+Cuando se cree eligo agregar Facebook Login,dando en el botón de "Setup"
+Eligo el tipo(Web App) y me pedirá el dominio del front(http://localhost:3000).
+En cuanto haya puesto el dominio para la app ya puedo ir a configuración/información-básica(Son los basic Settings que hay que configurar)
+Ya desde el primer momento puedo ver la App Id(Identificador de la aplicación) y al lado el Secret en los Basic Settings.
+En Products/FacebookLogin/Settings tengo que proveer una URi válida de redireccionamiento del OAuth(http://locahost:5000/auth/facebook/callback)
+
+NOTA: fijate que puedo agregar propiedades al UserSchema para que me gestione passport la creación del usuario:
+
+* Hay que agregar facebookId,googleId,githubId,etc... si quiero al schema 
+ function(accessToken, refreshToken, profile, cb) {
+    User.findOrCreate({ facebookId: profile.id }, function (err, user) {
+      return cb(err, user);
+    });
+
+
