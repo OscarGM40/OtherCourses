@@ -1,0 +1,62 @@
+          FACE DETECTION + TAG YOUR FRIENDS
+
+Source: https://www.youtube.com/watch?v=wVK3HHbli7g&t=32s
+
+En este proyecto vamos a usar una API que usara AI para detectar rostros en una imagen.La API se llama face-api.js
+Puedo ver su web aqui:
+https://justadudewhohacks.github.io/face-api.js/docs/index.html
+
+Para instalarla basta con:
+npm i face-api.js
+
+Para usarla hay que configurar algunas cosas.Dentro de la carpeta public de mi app de react hay que pegar los modelos
+que están en este repo en el folder 'weights':
+https://github.com/justadudewhohacks/face-api.js/
+
+Voy a usar la API Canvas que me va a permitir dibujar en la imagen.Recuerda que hay que dar un alto,un ancho y un id a la etiqueta:
+<canvas id="myCanvas" width="400px" height="300px" style="border:1px solid black"/>
+
+Despues recupero el contexto y ya puedo pintar en el lienzo:
+const ctx = document.getElementById("myCanvas").getContext("2d")
+ctx.strokeRect(50,50,100,100)
+
+Dado que estamos en React usaré una ref.Además necesito varias:
+
+const imgRef = useRef();
+const canvasRef = useRef();
+
+      <img
+        ref={imgRef}
+        width="940"
+        height="650" />
+
+      <canvas
+        ref={canvasRef}
+        width="940"
+        height="650" />
+
+Para cargar un modelo(no vamos a usar todos) en un entorno NOde hay que usar:
+await faceapi.nets.${modelName}.loadFromDisk('./models')
+* también se puede usar loadFromURI
+
+impor * as faceapi from 'face-api.js' <- lo pide asi parece
+
+Vamos a cargar todos los modelos en un efecto,pero no pueden empezar a cargarse si no hay una imagen.Ademas los vamos a cargar en paralelo:
+
+useEffect(() => {
+    const loadModels = () => {
+      Promise.all([
+      faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+      faceapi.nets.faceLandmark68Net.loadFromUri('/models'),  
+      faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
+      faceapi.nets.faceExpressionNet.loadFromUri('/models')
+      ])
+        .then(console.log('finished loading models'))
+        .catch(err => console.log(err));
+    }
+    imgRef && loadModels();
+  },[])
+
+Para usar estos modelos en vez de ese console log vamos a usar una funcion para procesar esa imagen.
+
+MINUTO 9
