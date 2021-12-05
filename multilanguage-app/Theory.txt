@@ -1,0 +1,81 @@
+          MULTILANGUAGE IMPL IN REACT
+
+Source: https://www.youtube.com/watch?v=w04LXKlusCQ
+
+React-i18next es un framework de internacionalización para React/React-native basado en i18next.
+
+Documentacion oficial: https://react.i18next.com/
+
+Para usarlo hay que instalar el propio i18next y la implementation para react 'react-i18next':
+>npm install react-i18next i18next --save
+
+Ahora hay que configurarlo:
+
+import i18n from "i18next";
+import { useTranslation, initReactI18next } from "react-i18next";
+
+/* de react me traigo i18n */
+i18n
+// le paso su adapter i18n down to react-i18next
+.use(initReactI18next) 
+  .init({
+    // the translations
+    // (tip move them in a JSON file and import them,
+    // or even better, manage them via a UI: https://react.i18next.com/guides/multiple-translation-files#manage-your-translations-with-a-management-gui)
+    resources: {
+      en: {
+        translation: {
+          "Welcome to React": "Welcome to React and react-i18next",
+        },
+      },
+      es: {
+        translation: {
+          "Welcome to React": "Bienvenido a React y react-i18next",
+        },
+      },
+      fr:{
+        translation: {
+          "Welcome to React": "Bienvenue à React et react-i18next",
+        },
+      },
+      }
+    },
+    lng: "en", // if you're using a language detector, do not define the lng option
+    lng:"es",
+    fallbackLng: "en", // fallback to this language if none is detected
+
+  });
+
+function App() {
+  const { t } = useTranslation();
+
+  return <h2>{t("Welcome to React")}</h2>;
+}
+
+Fijate como es usar el hook useTranslation()bajo el nombre 't' para obtener el texto traducido.Y meter los textos en el archivo de traducciones.
+
+NOTA: la App va a mostrar el idioma según el lng que en el ejemplo está hardcodeado(lng: "en")
+Puedo hacer que lo coga de aqui(<html lang="es>)
+
+lng: document.querySelector('html').lang
+* Sin embargo esto no es muy útil ya que el servidor me devolverá un archivo con el mismo lenguaje realmente.Hay que hacer esto dinámico.
+Afortunadamente puedo usar un detector de lenguaje,una libreria que mirará por el language del browser:
+
+>npm install i18next-browser-languagedetector --save
+
+Para hacer el wiring simplemente es una opcion mas en la config inicial:
+import i18next from 'i18next'; <- ya lo tendré
+import LanguageDetector from 'i18next-browser-languagedetector';
+
+i18next.use(LanguageDetector).init(...);
+
+El plugin tiene varios lugares de donde detectar el lenguaje,como el browser,el localStorage,una cookie,la sessionStorage...
+El orden es muy importante:
+
+detection:{
+  order:['htmlTag','cookie','localStorage','path','subdomain'],
+  caches:['cookie','localStorage'],
+}
+* Más adelante entenderé el orden y porqué estas cinco.La opción de caches es básica,ya que debo almacenar la preferencia.LA cookie va perfecta.
+
+Minuto 10
