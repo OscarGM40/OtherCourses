@@ -6,6 +6,8 @@ React-i18next es un framework de internacionalización para React/React-native b
 
 Documentacion oficial: https://react.i18next.com/
 
+            INSTALAR Y CONFIGURAR i18NEXT
+
 Para usarlo hay que instalar el propio i18next y la implementation para react 'react-i18next':
 >npm install react-i18next i18next --save
 
@@ -16,12 +18,10 @@ import { useTranslation, initReactI18next } from "react-i18next";
 
 /* de react me traigo i18n */
 i18n
-// le paso su adapter i18n down to react-i18next
+// le paso su adapter al framework
 .use(initReactI18next) 
   .init({
-    // the translations
-    // (tip move them in a JSON file and import them,
-    // or even better, manage them via a UI: https://react.i18next.com/guides/multiple-translation-files#manage-your-translations-with-a-management-gui)
+    // traducciones en duro.NO usar asi,hardcodeadas
     resources: {
       en: {
         translation: {
@@ -40,15 +40,13 @@ i18n
       },
       }
     },
-    lng: "en", // if you're using a language detector, do not define the lng option
-    lng:"es",
-    fallbackLng: "en", // fallback to this language if none is detected
-
+    lng: "en", // de nuevo no se hardcodea el lng
+   fallbackLng: "en", // fallback para cuando no se detecte el lng
   });
+Realmente esto es muy básico,hay varias librerias que conformarán toda la suite para implementar traducciones.
 
 function App() {
   const { t } = useTranslation();
-
   return <h2>{t("Welcome to React")}</h2>;
 }
 
@@ -56,9 +54,12 @@ Fijate como es usar el hook useTranslation()bajo el nombre 't' para obtener el t
 
 NOTA: la App va a mostrar el idioma según el lng que en el ejemplo está hardcodeado(lng: "en")
 Puedo hacer que lo coga de aqui(<html lang="es>)
-
 lng: document.querySelector('html').lang
+
 * Sin embargo esto no es muy útil ya que el servidor me devolverá un archivo con el mismo lenguaje realmente.Hay que hacer esto dinámico.
+
+          AUTO-DETECT BROWSER LANGUAGE PLUGIN
+
 Afortunadamente puedo usar un detector de lenguaje,una libreria que mirará por el language del browser:
 
 >npm install i18next-browser-languagedetector --save
@@ -70,12 +71,62 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 i18next.use(LanguageDetector).init(...);
 
 El plugin tiene varios lugares de donde detectar el lenguaje,como el browser,el localStorage,una cookie,la sessionStorage...
-El orden es muy importante:
+El orden es muy importante.Este plugin usará la propiedad detection y el middleware anterior:
 
 detection:{
-  order:['htmlTag','cookie','localStorage','path','subdomain'],
+  order:[,'cookie','htmlTag','localStorage','path','subdomain'],
   caches:['cookie','localStorage'],
 }
-* Más adelante entenderé el orden y porqué estas cinco.La opción de caches es básica,ya que debo almacenar la preferencia.LA cookie va perfecta.
+* Más adelante entenderé el order y porqué estas cinco.La opción de caches es básica,ya que debo almacenar la preferencia.
+La cookie como primera va perfecta,al parecer.
 
-Minuto 10
+      CARGAR TRADUCCIONES DE UN BACKEND(i18next-http-backend)
+
+NOTA: es obvio que las traducciones deben ir en archivos separados.Ponerlo todo en un mismo lado además haría que tengas que descargarte todas las traducciones cuando sólo necesitas una.
+
+Para esto voy a necesitar otro paquete llamado i18next-http-backend. ES un middleware que me va a permitir cargar las traducciones de diferentes lugares(carpetas,servidores,...).Lo instalo:
+
+>npm i i18next-http-backend --save
+
+Fijate que este paquete usa React Suspense para que pueda mostrar un spinner o hacer algo mientras carga
+Error: App suspended while rendering, but no fallback UI was specified.
+
+Para decir a la libreria que no use suspense,y de donde cargar las traducciones(puede ser otra api,etc):
+
+backend: {
+  loadPath: "/assets/locales/{{lng}}/translation.json"
+ },
+react: {
+  useSuspense: false  // no uso suspense
+}
+
+NOTA:siempre va a cargar el paquete del fallback más el de la cookie:
+fallbackLng: "en", <- el de en siempre va a cargarlo
+
+TAmbién debo especificar los lenguajes que soporta mi app
+supportedLngs: ['en', 'es', 'fr','ar'],
+
+          PASAR VARIABLES DINÁMICAS A LAS TRADUCCIONES
+
+En las traducciones puedo dejar huecos para inferir valores de cualquier lugar:
+  "days_since_release": "ça fait {{number_of_days}} jours depuis la sortie de cette vidéo"
+Simplemente uso dobles llaves y un nombre,despues debo proporcionar el valor:
+
+  const releaseDate = new Date("2021-12-06");
+  const number_of_days = Math.floor((new Date() - releaseDate)/(1000*60*60*24));
+
+  return (
+    <div className="container-fluid">
+      <div className="d-flex flex-column align-items-start">
+        <h1 className="font-weight-normal mb-3">
+          {t("welcome_message")}
+        </h1>
+        <p className="lead">
+          {t("days_since_release",{number_of_days})} 
+        </p>
+
+Fijate que se llaman igual, 'number_of_days' y que debo proporcionar un valor.Esto es necesario para inferir un nombre desde redux,etc..
+Puedo dar un valor con   {t("days_since_release",{number_of_days:25})}.Esto sobreescribirá a todo y será 25.
+
+MINUTO 22
+
