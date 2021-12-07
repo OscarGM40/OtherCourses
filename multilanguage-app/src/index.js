@@ -6,7 +6,7 @@ import { initReactI18next } from "react-i18next";
 /* plugin para deteccion del idioma del browser */
 import LanguageDetector from "i18next-browser-languagedetector";
 import HttpApi from 'i18next-http-backend';
-
+// import 'flag-icon-css/css/flag-icon.css';
 
 /* los relative imports siempre debajo asinto */
 import App from './App';
