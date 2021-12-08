@@ -1,11 +1,14 @@
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import 'flag-icon-css/css/flag-icons.css';
 import i18next from "i18next";
+import cookies from "js-cookie";
+
 
 const languages = [
   { code: "fr", name: "Français", country_code: 'fr' },
   { code: "en", name: "English", country_code: 'gb' },
-  { code: "ar", name: "العربية", country_code: 'sa' },
+  { code: "ar", name: "العربية", country_code: 'sa',dir:"rtl" },
   { code: "es", name: "Español", country_code: 'es' },
 ]
 
@@ -21,11 +24,20 @@ const GlobeIcon = ({ width = 16, height = 16 }) => {
 
 const App = () => {
 
+  const currentLanguageCode = cookies.get('i18next') || 'en';
+  const currentLanguage = languages.find(language => language.code === currentLanguageCode);
   const { t } = useTranslation();
 
   const releaseDate = new Date("2021-12-06");
   const number_of_days = Math.floor((new Date() - releaseDate) / (1000 * 60 * 60 * 24));
 
+  /* cada vez que nazca el componente busca en la cookie,si hay un lenguage que haga match con la cookie le pasa la direccion al body.Logicamente el currentLanguage va como dependency*/
+  useEffect(() => {
+    document.body.dir = currentLanguage.dir || "ltr";
+    document.title = t("app_title");
+  },[currentLanguage.dir,t]);
+  /* t nunca va a cambiar,fijate,pero aun asi se pide como dep */
+  
   return (
     <div className="container-fluid">
       <div className="d-flex justify-content-end">
@@ -38,14 +50,24 @@ const App = () => {
             aria-expanded="false">
             <GlobeIcon />
           </button>
-          <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-
+          <ul 
+            className="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+              <li>
+                <span className="dropdown-item-text">
+                  {t('language')}
+                </span>
+              </li>
             {languages.map((language) => (
               <li key={language.country_code}>
-                <button className="dropdown-item"
-                  onClick={() => i18next.changeLanguage(language.code)}   >
-                  <span className={`flag-icon flag-icon-${language.country_code} mx-2`}>
-
+                <button 
+                  className="dropdown-item"
+                  onClick={() => i18next.changeLanguage(language.code)}   
+                  disabled={language.code === currentLanguageCode}
+                  >
+                  <span 
+                  className={`flag-icon flag-icon-${language.country_code} mx-2`}
+                  style={{ opacity: language.code === currentLanguageCode ? 0.5 : 1 }}
+                  >
                   </span>
                   {language.name}
                 </button>

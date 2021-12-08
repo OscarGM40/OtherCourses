@@ -162,4 +162,46 @@ import i18next from 'i18next';
 <button className="dropdown-item"
   onClick={() => i18next.changeLanguage(language.code)}   >
 
-MINUTO 30
+          SUSPENSE EN REACT
+
+Puedo usar Suspense para mostrar algo mientras carga la aplicacion:
+import react,{Suspense} from 'react';
+
+const loadingMarkup = <div className="text-center">
+  <div className="spinner-border" role="status">
+    <span className="sr-only">Loading...</span>
+  </div>
+
+<Suspense fallback>
+  <App />
+</Suspense>
+
+          CHANGE DIRECTION OF THE TEXT
+
+Puedo usar un atributo 'dir' en la tag body que especifica la dirección del texto:
+<body dir="ltr"> <- por defecto es asi también
+
+Despues la pongo como prop en los lenguajes necesarios:
+  { code: "ar", name: "العربية", country_code: 'sa',dir:"rtl" },
+Ahora tengo que acceder a la cookie asi que necesito la libreria js-cookie(es un paquete que me permite manipular cookies en el cliente,fijate que cookie-session es para el server):
+>npm install js-cookie
+
+import cookies from "js-cookie";
+
+const currentLanguageCode = cookies.get('i18next') || 'en';
+const currentLanguage = languages.find(language => language.code === currentLanguageCode);
+
+document.body.dir = currentLanguage.dir || 'ltr';
+
+  
+
+Por último seria buena idea cambiar como se ve el lenguaje seleccionado de alguna forma:
+ <button 
+    className="dropdown-item"
+    onClick={() => i18next.changeLanguage(language.code)}   
+    disabled={language.code === currentLanguageCode}
+    >
+    <span 
+    className={`flag-icon flag-icon-${language.country_code} mx-2`}
+    style={{ opacity: language.code === currentLanguageCode ? 0.5 : 1 }}
+    >
