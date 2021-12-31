@@ -1,0 +1,485 @@
+				WEBINAR PRIMEROS PASOS CON GITHUB ACTIONS
+
+Source: https://www.youtube.com/watch?v=Rfe4aNNIoBo
+
+					 ¿QUÉ ES CI-CD?
+
+Cada vez que que hago una aplicación siempre pasaré por los mismos pasos:
+1- Code 2- Build o compilación 3- Testing 4- Release 5- Deploy
+
+La parte de CI O integración continua(continuos integration) abarca las 3 primeras partes(codificar-compilar y testing).Es algo que se hace de forma natural al programar.
+El DC o entrega continua(Continuos Delivery) es el siguiente paso,el 4 y serŕa el release del paquetizado.
+El paso 5º,el deploy sería el Continous Deployment.Fijate que es 'continous'
+
+Github Actions es la apuesta de Github para automatizar los flujos de trabajo de CI/CD.	
+
+					COMPONENTES EN GITHUB ACTIONS
+
+En Github Actions tendré la siguiente terminología:
+
+1º- Workflow: es un conjunto de jobs,que se ejecutarán según los eventos que se definan(una PR,un push).
+
+2º- Jobs. cuando un workflow se ejecuta lanza una serie de jobs,cada job agrupa un conjunto de steps(o uno solo incluso)
+
+3º- Step: cada step puede ser una acción o un comando
+* Un job puede ser dependiente de otro,o puedo arrancar varios en paralelo.
+
+4º- Una acción(en un step) es un conjunto de comandos que cubren un área determinada.Puedo usar los de Github,o de terceros o crearme la mia propia
+
+5º- Runner: todo esto se tiene que que ejecutar en algun lado.Los runner son programas que se encargan de ejecutar los jobs y devolver el resultado(runs_on)
+
+									RUNNERS
+Github me ofrece dos opciones para los SO o 'runners' a elegir...
+En la 1ª puedo elegir los runners que Github me ofrece, ya listos para consumir en la nube.
+
+		VENTAJAS
+1- Nos lo da todo configurado
+2- No tengo que preocuparme de mantenerlo
+3- Hay 3 S.O disponibles(Windows,Mac y Linux)
+
+       DESVENTAJAS
+4- Pagas por uso(en el modo gratis 2000 minutos al mes,despues hay que pagar)
+5- No tengo forma de conectarme a estos agentes,runners,SOs,... da igual el nombre,no podré configurar nada,instalar nada en ellos,...
+6- Si necesito algo muy especifico puede que no sea suficiente
+
+En la 2ª opción yo mismo puedo hospedar los runners en local(puede ser una VM)
+      
+      VENTAJAS
+
+1º- Puedo acceder a esos recursos y tengo total privacidad
+2º- Tengo total flexibilidad de configuración del runner
+3º- No tengo que preocuparme por los minutos de uso de esa CPU
+		
+	DESVENTAJAS
+
+4º- Tengo que tener esa infraestructura
+5º- Tengo que configurarlo
+6º- Tengo que mantenerlo
+
+REpo aqui: https://github.com/Lemoncode/webinar-github-actions
+
+					Demo 01
+
+Gisela usará una plantilla para Dotnet ya que usa un proyecto de c#.CAbe recalcar que se le puede dar un nombre cualquiera a cada job,si bien lo dejará como 'build',puedo darle cualquiera,pero dado que hará el build va bien el nombre,¿no?:
+
+name: Demo 1 - CI
+
+on:
+  push:
+    branches: [ disabled ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.101
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    - name: Test
+      run: dotnet test --no-restore --verbosity normal
+
+Despues del nombre customizable del job hay que especificar el runner.Cada job puede usar un runner diferente.
+
+Dado que tiene como eventos cualquier push a master o PR sobre master ya desde el primer momento en que guarde el archivo hará el push a master con la folder .github y dispará la action:
+on:
+  push:
+    branches: [ disabled ]
+  pull_request:
+    branches: [ master ]
+
+Genial.
+
+NOTA:fijate que ha desactivado cualquier push usando un branch que no existe(y no podia haber emitido la sección push simplemente?Es Obligatoria pues?:
+
+on:
+  push:
+    branches: [disabled]
+
+			EJEMPLO DEMO 02
+
+En el ejemplo 02 usará una plataforma Windows y además de hacer simplemente el build como en el demo01 lo despliega en azure(lo publica??).
+
+name: Demo 2 - CI and CD
+
+on:
+  push:
+    branches: [disabled]
+
+jobs:
+  build:
+    runs-on: windows-latest #He cambiado el runner. Hay tres disponibles
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.1.101
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+      - name: Test
+        run: dotnet test --no-restore --verbosity normal
+      #Añado el uso de artefactos
+      - name: Publish the code
+        run: dotnet publish -c Release -o ${{ env.DOTNET_ROOT }}/webapp
+        working-directory: ./LemoncodeWeb
+      - name: Upload artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: webapp-artifact
+          path: ${{ env.DOTNET_ROOT }}/webapp
+
+  deploy:
+    runs-on: windows-latest
+    needs: [build] #Hay que esperar a que termine el job llamado build
+
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v1
+      with:
+        name: webapp-artifact
+        path: ${{ env.DOTNET_ROOT }}/webapp
+
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v1
+      with:        
+        slot-name: 'producction'
+        package: ${{ env.DOTNET_ROOT }}/webapp
+        publish-profile: ${{ secrets.WebAppPublishProfile }}
+
+En este ejemplo va a publicar el código a una carpeta llamada 'webapp'.Despues lo sube(a donde?).
+Fijate que para subirlo usa uses: actions/upload-artifact@v1.
+
+Despues emezará el segundo job llamado 'deploy'.Fijate que tuvo que hacerlos síncronos(eran paralelos por naturaleza?).
+
+deploy: 
+  runs-on: windows-latest
+  needs: [build]
+
+Fijate que ahora lo descarga con 
+  uses: actions/download-artifact@v1 
+
+Por último despliega la app en Azure usando su github action:
+ - name: Deploy to Azure
+   uses: azure/webapps-deploy@v1
+
+Como puedo ver es super sencillo automatizar el deploy tras un push con dos simples jobs.
+Cuando vaya al job puedo descargarme este artefacto(parecido a una tag-release) y ver todo lo que subí.Parece que puedo usar actions/upload-artifact@v1 para subir un comprimido con el código que tenga(sin importar el lenguaje)
+
+Y por último fijate como usó variables de entorno con ${{ env.DOTNET_ROOT }} <- recuerda los espacios y secrets.
+Recalcar que las puedo crear en el file también,de forma no anónima:
+env: 
+ SALUDO: "hola!"
+
+ - run: echo ${{ env.SALUDO }} <- ojo que lo puso en la línea de abajo.
+
+Por último,todas las acciones como actions/download-artifact@v1 las puedo consultar en Github MarketPlace(buscando por actions).Allí veré cualquier action(incluso de terceros).Puedo ver más información de esa action,asi como la forma en que debo llamarla(el nombre).
+Asi que sabiendo que puedo usar accione de terceros o de Github,vamos a crear la nuestra.
+
+					DEMO 03 CUSTOM ACTIONS
+
+Para crear esta acción podría usar Docker o typescript.En esta acción usaremos Apache Benchmark,para realizar pruebas de carga.Gisela la creó para su uso.
+
+Una acción normalmente tiene tres archivos,un .yml, un Dockerfile y un .sh
+
+El primero,el .yaml es el manifiesto,en el se define el nombre de la acción,que inputs puede recibir,si son requeridos o no,donde se ejecuta,...Veamos un ejemplo:
+
+Este sería el action.yaml (debe de llamarse action??)
+
+name: Apache Benchmark Action
+description: Pon a prueba tu aplicación
+author: Gisela Torres
+
+inputs:
+  URL:
+    description: "La URL que quieres probar"
+    required: true
+  Concurrency:
+    description: "Número de usuarios concurrentes para tu test"
+    required: false
+    default: '50'
+  NumberOfRequests:
+    description: "Número de peticiones que quieres que se lancen"
+    required: false
+    default: '1000'
+
+runs:
+  using: "docker"
+  image: "Dockerfile"
+
+branding:
+  icon: "activity"
+  color: "orange"
+
+name,description y author son simples settings.La sección inputs es para entradas(descripcion,nombre,required,...).'runs' hace referencia a donde se ejecuta y branding es para el tipo de icono y el color.
+
+En cuanto al Dockerfile es un simple debian al que le añade el script(fijate como lo añade con ADD),le instala un par de cosas y ejecuta el script tras darle permisos de ejecución:
+
+FROM debian:10.3-slim
+LABEL maintainer="Gisela Torres"
+
+ADD entrypoint.sh /entrypoint.sh
+
+RUN apt-get update && apt-get install -y apache2-utils
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+El bash es muy fácil,simplemente imprime información
+
+#!/bin/sh -l
+
+sh -c "echo Entry point..."
+sh -c "echo URL: $INPUT_URL"
+sh -c "echo Concurrency: $INPUT_CONCURRENCY"
+sh -c "echo Number of requests: $INPUT_NUMBEROFREQUESTS"
+
+sh -c "ab -n $INPUT_NUMBEROFREQUESTS -c $INPUT_CONCURRENCY $INPUT_URL"
+
+Fijate que es la última línea la que ejecuta el comando,billy.Es obvio que es una acción muy sencilla,pero muy válida para testear.
+
+IMPORTANTE: fijate que todos las propiedades de 'inputs' en el yaml están llegando como variables de entorno al bash pero con el prefijo $INPUT_CONCURRENCY(y además del prefijo se recuperan en mayúsculas,da igual que las declare Concurrency que la rescataré como $INPUT_CONCURRENCY).Genial.
+
+Para usarlo en un yaml de un workflow de Github tendré que tener estos tres archivos en un folder(lo llamaremos ab-action)Por ejemplo lo dejo en la raiz del repo.Ahora para acceder a él debo usarlo como otro job(con el nombre que quiera):
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    needs: [build,deploy]
+    steps:
+      - uses: actions/checkout@v1 <- pilla todo el repo actual
+      - uses: ./ab-action <- y coge esta carpeta(lógicamente coincide)
+        with:
+          URL: "http://lemoncodewebinar.azurewebsites.net"
+
+NOTA: ella tiene los dos jobs build y deploy y en ellos usa Windows.Fijate que puedo cambiar de Sistema Operativo entre job y job!
+IMPORTANTE: GithubActions buscará en esa carpeta ab-action por algun .yaml(confirmar si debo llamar al file action.yaml o puede ser cualquiera)
+
+Puedo configurar las actions en los settings,habilitando o deshabilitando las locales(como ésta) y de terceros por repositorio.
+
+NOTA:fijate que no lo publicó al MarketPlace,tendría que investigar como publicarlo.
+NOTA:las variables de entorno se hacen a nivel global,asi puedo cambiar de runner en cada job que tendré scope sobre ellas.Su ámbito es el workflow entero.
+
+
+NOTA: fijate que interesante el video del pelado:
+https://www.youtube.com/watch?v=MNBf-ylhtK0
+En él aclara como apuntar a un cluster cualquiera de kubernetes usando una GithubActions de terceros simplemente pasandole el archivo de configuración del cluster encriptado
+
+				DEMO 04 MATRIX Y DIFERENTES CONFIGURACIONES
+
+¿Qué es matrix?Matrix es un sistema que tiene GithubActions para generar lo que GithubActions denomina estrategias.
+Yo puedo crearme una matriz con diferentes valores que luego puedo usar en mis jobs.Veamos un ejemplo sencillo:
+
+name: Demo 4 - Playing with matrix
+
+on:
+  push:
+    branches: [disabled]
+
+jobs:
+  test:
+    strategy:
+      #A job matrix can generate a maximum of 256 jobs per workflow run
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node: [6, 8, 10]
+        exclude:
+        - os: windows-latest
+          node: 6
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Print a greeting
+        run: |
+          echo Wake up Neo...
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node }}
+
+Puedo ver que Gisella se creó una matrix de sistemas operativos y lo que quiere es crear un job con cada uno de esos sistemas operativos.Para crear una matriz iterable en GithubActions se usa la keyword 'matrix' y se le dá un nombre:
+
+  strategy:
+    matrix:
+      os: [ubuntu-latest, macos-latest, windows-latest]
+  runs-on: ${{ matrix.os }}
+
+NOTA: GithubActions ejecutará tantas veces este job como elementos tenga la matriz.Fijate que el uso de un branch Fantasma parece muy útil.
+
+No estoy limitado a una sola matriz,sino que puedo usar varias,asi podría testear todo en los tres sistemas operativos y por ejemplo en node 10,12 y 14
+jobs: 
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu,macos,windows]
+        node:[10,12,14]
+    runs_on: ${{ matrix.os }}
+    steps:
+      - name: print a greeting
+        run: |
+          echo Wake up Neo...
+      - uses: actions/setup-node@v1
+        with: 
+          node-version: ${{ matrix.node }}
+
+Por último fijate que este código se va a ejecutar 9 veces(por cada matrix.os va a usar los tres matrix.node).Bien,pero imagina que no quiero ejecutar node 12 cuando sea Windows:
+  ...
+  node: [10,12,14]
+  exclude: <- ojo que es exclude y no excludes
+    - os: windows-latest
+      node: 10 
+* Cuando esté windows como SO excluira el node 10(dando 8 jobs en vez de 9)
+
+			DEMO 05 APACHE BENCHMARK CON VARIAS MATRICES PARA URLS
+
+Un ejemplo más útil podría ser lanzar mi apache benchmark(mi custom action del proyecto  con varias urls.Muy sencillo:
+name: Demo 5 - Using Matrix
+
+on:
+  push:
+    branches: [disabled]
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        URL:
+          - https://lemoncodewebinar.azurewebsites.net/
+          - https://lemoncodewebinar.azurewebsites.net/counter
+          - https://lemoncodewebinar.azurewebsites.net/fetchdata
+    steps:
+      - uses: actions/checkout@v1
+      - uses: ./ab-action
+        with:
+          URL: ${{ matrix.URL }}
+
+Fijate que usar una matriz hará iterar tres veces.
+NOTA: si dejara el needs [build,deploy] este job no arrancaría nunca,ojo con decirle a un job que necesita de otro.
+
+NOTA:los runners son los que ejecutan nuestras cosas,como un sistema operativo,docker,etc...
+
+					VIRTUAL ENVIRONMENTS
+
+Si voy a este repo puedo ver que tiene cada imagen de SO integrado(pinchando en included software),ya que no viene el SO a secas:
+
+https://github.com/actions/virtual-environments
+
+Pr ejemplo las tools(ojo que hay mucho más,como tools para CLI,DBs instaladas como Mongo,Postgre ,lenguajes como Java,Go... 
+Ansible 2.12.1
+apt-fast 1.9.11
+AzCopy 10.13.0 (available by azcopy and azcopy10 aliases)
+Bazel 4.2.2
+Bazelisk 1.10.1
+Bicep 0.4.1008
+Buildah 1.21.3 (apt source repository: https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable)
+CMake 3.22.1
+CodeQL Action Bundle 2.7.3
+Docker Compose v1 1.29.2
+Docker Compose v2 2.1.1+azure-2
+Docker-Buildx 0.7.1
+Docker-Moby Client 20.10.11+azure-2
+Docker-Moby Server 20.10.11+azure-2
+Fastlane 2.198.1
+Git 2.34.1 (apt source repository: ppa:git-core/ppa)
+Git LFS 3.0.2 (apt source repository: https://packagecloud.io/install/repositories/github/git-lfs)
+Git-ftp 1.6.0
+Haveged 1.9.1
+Heroku 7.59.2
+HHVM (HipHop VM) 4.138.0
+jq 1.6
+Kind 0.11.1
+Kubectl 1.23.0
+Kustomize 4.4.1
+Leiningen 2.9.8
+MediaInfo 19.09
+Mercurial 5.3.1
+Minikube 1.24.0
+n 8.0.1
+Newman 5.3.0
+nvm 0.39.0
+OpenSSL 1.1.1f 31 Mar 2020
+Packer 1.7.8
+PhantomJS 2.1.1
+Podman 3.4.2 (apt source repository: https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable)
+Pulumi 3.19.0
+R 4.1.2
+Skopeo 1.3.0 (apt source repository: https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable)
+Sphinx Open Source Search Server 2.2.11
+SVN 1.13.0
+Terraform 1.1.0
+yamllint 1.26.3
+yq 4.16.1
+zstd 1.5.0 (homebrew)
+
+También habrá varias variables de entorno y tropecientas versiones para cada lenguaje,etc...
+Recuerda que tengo acceso a docker asi que puedo ejecutar cualquier contenedor si no encuentro lo que necesito contenedor al canto.
+
+También  puedo usar self-hosted runners en vez de los tres de GithubActions.Lógicamente habrá que etiquitarlo para poder llamarlo.Para crear tu propio runner en Actions(debajo de settings/secrets) puedo ver el botón de Add runner.
+Tendré que elegir la arquitectura y Sistema Operativo,etc y seguir sus pasos.LO ALOGARÉ EN MI EQUIPO(asi que tengo que bajarlo con curl o wget,etc...)
+Para configurarlo me darán un script .sh para ejecutar cuando lo baje.
+Ahora que ya sabemos usar un runner self-hosted  veamos como ejecutar un workflow en él.
+
+					DEMO 06 SELF-HOSTED RUNNER
+
+name: Demo 6 - Testing self-hosted runners
+on:
+  push:
+    branches: [disabled]    
+
+jobs:
+  hello-world:
+    # The type of runner that the job will run on
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run a one-line script
+        run: echo Hello, world!
+  mac-only:
+    runs-on: [self-hosted, macOS]
+    steps:
+      - name: Run a multi-line script
+        run: |
+          echo This step was run on MAC
+          echo using [self-hosted, macOs]
+  windows-only:
+    runs-on: [self-hosted, Windows]
+    steps:
+      - name: Create a directory in _work wit PowerShell
+        run: |
+          If(!(test-path "this-is-a-test"))
+          {
+            New-Item -ItemType Directory -Force -Path "this-is-a-test"
+          }
+  mac-kubectl:
+    runs-on: [self-hosted, macOs]
+    steps:
+      - name: Execute kubectl locally
+        run: |
+          kubectl get nodes
+
+NOTA:fijate que la label self-hosted va a coincidir en el caso de Gisela con 3 runners suyos,asi que cogerá el primero o cualquiera.Da igual cual.
+
+Puede ser más concreta y usar runs-on: [self-hosted, macOs] y asi se buscará un runner con las label self-hosted y macos.Es preferible poner ambos,asi te aseguras que se ve a simple vista que el runner va a ser self-hosted
+
+Además,parece que usar self-hosted no vacía la pool de 2000 minutos para hacer pruebas
+NOTA: con Alt+F2 saco el krunner que es el buscador de plasma,puedo buscar archivos.Usalo.y Discover es el nombre del gestor de aplicaciones
+
+NOTA: recuerda que un path en Windows sólo puede tener 256 caracteres.
+
+Fijate que Gisela comenta que a veces no quedará más remedio que usar un runner self-hosted porque puede que tenga que conectarme a la VPN de la empresa,o acceder a determinado archivo que está privado y no podré acceder desde los runners de GithubActions.
+
+NOTA: puedo programar el workflow,en vez de cada push a master o cada PR simplemente programarlo.Para ello se usa 'schedule' que  usa un cron:
+on:
+  schedule:
+    - cron: '*/15 * * * *' <- cada hora a y cuarto? o cada 15 minutos?

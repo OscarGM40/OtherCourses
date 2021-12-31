@@ -23,10 +23,6 @@ io.on('connection', (socket) => {
    socket.emit('me',socket.id);
    // diria que lo puedo hacer con el id de mongo que nunca cambiará!
 
-   // si el socket se desconectara emito a todos menos a mi el evento calleneded
-   socket.on("disconnect", () => {
-      socket.broadcast.emit("callEnded")
-   })
    
    /* Un cliente emitirá el evento callUser(cuando??)con este objeto data={
       userToCall:id al que llamar
@@ -41,10 +37,14 @@ io.on('connection', (socket) => {
          name
       })
    })
-
+   
    // cuando un cliente emita el evento answerCall le paso a data.to la señal en el evento callAccepted(no lo habia pasado ya arriba??)
    socket.on("answerCall",(data) => {
       io.to(data.to).emit("callAccepted",data.signal)
+   })
+   // si el socket se desconectara emito a todos menos a mi el evento calleneded
+   socket.on("disconnect", () => {
+      socket.broadcast.emit("callEnded")
    })
    
 })

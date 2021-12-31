@@ -1,0 +1,164 @@
+					WEB AUDIO API - AUDIO CONTEXT
+
+Source: https://www.html5rocks.com/en/tutorials/webaudio/intro/
+
+FAQs de la API: https://developers.google.com/web/updates/2012/01/Web-Audio-FAQ
+
+La API Web Audio es una API de alto nivel de Javascript para procesar y sintetizar audio en aplicaciones web.El objetivo de esta API es incluir capacidades encontradas en máquinad de audio modernas y también poder mezclar,procesar y filtrar tareas encontradas en aplicaciones modernas de escritorio de audio.
+
+						GETTING STARTED
+
+Un AudioContext es un contexto para manejar y reproducir cualquier audio.Para producir un sonido usando la Web Audio API, crea una o más fuentes de sonido(sound sources) y conéctalas al sonido-destino proveido por la instancia AudioContext (es una clase).
+Esta conexión no necesita ser directa,y puede ir a través de cualquier número de AudioNodes intermediarios que actuan como modulos de procesamiento para la señal de audio. 
+Este "routing" es descrito en gran detalle aqui:
+https://www.w3.org/TR/webaudio/
+
+Una única instancia de tipo AudioContext puede soportar multiples entradas de sonido y complejos gráficos de audio,así que sólo necesitaré una instancia por cada aplicación de audio que cree.
+Muchas de las funciones de esta Web Audio API como crear AudioNodes o decodificar archivos de audio son métodos de esta instancia AudioContext.
+
+Para crear una instancia:
+let context;
+window.addEventListener('load',init,false);
+
+function init(){
+  try{
+  window.AudioContext = window.AudioContext || window.webkitAudioContext
+  }catch(e){alert('web audio API is not supported in this browser}
+}
+* Para browsers Blink-bases y Webkit- hay que usar el prefijo 'webkit' tal como hemos usado.Fácil
+
+				LOADING SOUNDS
+
+La Web Audio API usa un AudioBuffer para sonidos de duración corta-media.Normalmente se usan XMLHttpRequest para cargar estos sonidos.
+La API soporta la carga de archivos de audio en múltiples formatos,como WAV,MP3, AAC,OGG y otros.
+
+El siguiente ejemplo muestra como cargar una muestra de sonido:
+
+let dogBarkingBuffer = null;
+
+window.AudioContext = window.AudioContext || window.webkitAudioContext;
+let context = new AudioContext() // creo la instancia de AudioContext
+
+function loadDogSound(url) {
+  let request = new XMLHttpRequest();
+  request.open('GET',url,true);
+  request.responseType= 'arraybuffer';
+
+  //decode asynchronously
+  request.onload = function() {
+    context.decodeAudioData(request.response,function(buffer){
+      dogBarkingBuffer = buffer;
+  },onError);
+  }
+  request.send();
+}
+
+El archivo de audio es binario(no es texto) asi que tengo que fijar la responseType como 'arraybuffer'.
+Una vez que el (no-codificado) archivo de audio ha sido recibido, puede almacenarse para un posterior decodificado,o puede ser inmediatamente decodificado usando la función decodeAudioData() mediante la instancia de AudioContext.
+Esté método toma el arraybuffer del archivo de audio almacenado en la request.response y lo decodifica asíncronamente(sin bloquear el hilo principal de ejecución)
+Cuando decodeAudioData() termina llama a su callback,que provee el audio recién decodificado como un AudioBuffer
+
+							PLAYING SOUNDS
+
+Una vez uno o más AudioBuffer hayan sido cargados,estoy preparado para ejecutar sonidos.Asumamos que acabo de cargar un AudioBuffer con el sonido de un perro ladrando y que la carga ha finalizado.Ya puedo reproducir este buffer con el siguiente código:
+
+window.AudioContext = window.AudioContext || window.webkitAudioContext;
+let context = new AudioContext();
+
+function playSound(buffer) {
+ let source = context.createBufferCource; // crear una fuente de sonido(un sonido)
+ source.buffer = bufffer; ///decirle a esa fuente que sonido reproducir
+ source.connect(context.destination) // conectar la fuente al destino(los altavoces)
+ source.start(0); <- reproducir la fuente 
+}
+
+NOTA: esta función playSound() puede ser llamada cada vez que se pulse una tecla o se haga click,etc...
+
+La función source.start(time) hace fácil ejecutar sonidos en momentos precisos(como en videojuegos).Sin embargo,para logra esto debo asegurarme que los buffers de sonidos están pre-cargados(puede que en sistemas viejos tenga que llamar a noteOn(time) en vez de a start(time)
+
+IMPORTANTE: en iOS el primer sonido es ignorado:
+An important point to note is that on iOS, Apple currently mutes all sound output until the first time a sound is played during a user interaction event - for example, calling playSound() inside a touch event handler. You may struggle with Web Audio on iOS "not working" unless you circumvent this - in order to avoid problems like this, just play a sound (it can even be muted by connecting to a Gain Node with zero gain) inside an early UI event - e.g. "touch here to play".
+
+					ABSTRACTING THE WEB AUDIO API
+
+Desde luego sería genial crear un sistema de carga más abstracto,que no esté hardcodeado para cargar ese sonido en específico.
+Hay varios approaches para tratar con los numerosos sonidos que una aplicación de audio o un game puede usar.Aqui vamos a ver una usando la clase BufferLoader(context,[]).LLEva el AudioContext donde aplicarse como primer argumento y un arreglo de sonidos como segundo(comprobar que puedo apuntar a un folder)
+
+
+window.onload = init;
+let context;
+let bufferLoader;
+
+function init() {
+ window.AudioContext = window.AudioContext || window.webkitAudioContext;
+ context = new AudioContext();
+
+ bufferLoader = new BufferLoader( 
+  context,
+  [ 
+	'../sounds/xxx.wav,
+    '../sounds/othersound.mp3
+  
+  ],
+  finishedLoading);
+  bufferLoader.load(); <- lo cargo
+} //fin function init
+
+function finishedLoading(bufferList {
+ let source1 = context.createBufferSource();
+ let source2 = context.createBufferSource();
+ source1.buffer = bufferList[0];
+ source2.buffer = bufferLIst[1];
+
+ source1.connect(context.destination);
+ source2.connect(context.destination);
+ source1.start(0);
+ source2.start(0);
+} // esto los arranca a la vez(y como lo hago para que no los arranque?).Que sea un boton de next el que arranque la siguiente.
+
+				CAMBIAR EL SONIDO
+
+Una de las operaciones más básicas que puedo querer como usuario es cambiar el volumen.Para realizar esto con la Web Audio API puedo enrutar/direccionar mi source sound a su destination a través de un GainNode.
+
+AudioContext => Source => GainNode => Destination
+
+Ejemplo en código:
+let gainNode = context.createGain(); //creo el GainNode
+source.connect(gainNode) //conecto la fuente al Nodo
+gainNode.connect(context.destination) //conecto el nodo al destino
+* Ahora ya puedo cambiar el volumen con:
+gainNode.gain.value = 0.5; (parece que va de 0 a 1)
+
+					FUNCIONALIDAD DE PLAYLIST
+
+NOTA:realmente puedo llamar a source.noteOn(0); en vez de al custom start.  
+
+ Puedo acceder a la duracion con source.buffer.duration y al currentTime con context.currentTime.Tendré que parar el timer en mi app cuando termine la canción.
+
+  playNow = createSource(bufferNow); <-puedo crear una source asi?investigar
+  var source = playNow.source;
+  var gainNode = playNow.gainNode;
+  var duration = bufferNow.duration; acceso a la duration
+  var currTime = context.currentTime; aaceso al time actual Investigar todo
+
+			USAR ETIQUETA AUDIO DE HTML CON LA WEB AUDIO API
+
+// Create an <audio> element dynamically.
+var audio = new Audio();
+audio.src = 'myfile.mp3';
+audio.controls = true;
+audio.autoplay = true;
+document.body.appendChild(audio);
+
+var context = new webkitAudioContext();
+var analyser = context.createAnalyser();
+
+// Wait for window.onload to fire. See crbug.com/112368
+window.addEventListener('load', function(e) {
+  // Our <audio> element will be the audio source.
+  var source = context.createMediaElementSource(audio);
+  source.connect(analyser);
+  analyser.connect(context.destination);
+
+  // ...call requestAnimationFrame() and render the analyser's output to canvas.
+}, false);

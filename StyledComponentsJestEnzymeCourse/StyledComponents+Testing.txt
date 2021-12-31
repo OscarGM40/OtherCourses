@@ -1,0 +1,237 @@
+		CURSO SERGIO  ZAMARRO STYLED COMPONENTS + TESTING CON JEST-ENZYME
+
+						REPASO REACT	
+
+NOTA: recuerda que en React puedo incluso usar un console.log en una expresión embebida JSX:
+<h1>{console.llog('esto es un h1') </h1>
+
+COMPONENTES AL VUELO:
+Recuerda que yo me puedo crear un componente cuando yo quiera.No estoy limitado a uno por archivo.Esto es algo que no usas nunca y es muy útil:
+
+const Dog = () => {
+  const imageUrl='https...';
+  return <img src={imageUrl} />
+};
+
+Y dentro del mismo archivo simplemente lo uso:
+function App(){
+  return (
+   <div>
+     <Dog />
+   </div>)} <- memoriza que puedes crear tantos componentes al vuelo como necesites.Olvidate de un componente por archivo.
+
+CLASES
+Lo mismo en una clase(tienen que heredar de React.Component  y usar render():
+class Dog extends. React.Component {
+ image='xxx';
+ render(){
+  return <img src={imageUrl} />
+
+NOTA:en las props se puede pasar cualquier cosa que sea Javascript,puede ser una funcion,un number,un string,un boleano,arreglos...
+
+Al trabajar con clases hay que usar this,state y setState(estos dos me los proporciona React}
+
+class Counter extends React.Component {
+	state = {
+      count:0,
+      message:'hola',
+  }
+  handleClick = J() => {
+    this.setState(prev => ({count: prev.count +1 })) <- mejor usar callbacks,incluso con clases prehistoricas.Esto asegura que prev es justo el estado anterior,pues en la callback va a viajar el último state.
+ }
+  render(){
+    return (
+     <>
+	  <h1>{this.count}</h1>
+	  <button onClick={this.handleClick}>Click Me</button>
+	 </>
+  )
+}
+				VIDEO 17 MÉTODOS DEL CICLO DE VIDA Y FASES
+
+En su fase de Montaje React pasa por las siguientes fases:Montaje(donde se ejecuta el constructor),y se crea el DOM.El ciclo de vida es el componentDidMount(o useEffect con un arreglo vacío en Hooks).Este ciclo es el más apropiado para realizar peticiones.
+
+La siguiente fase será actualización:se dispara cada vez que  un componente cambian su props,o cuando se llama a un setState(al setter de un useState en hooks).Su ciclo es componentDidUpdate o useEffect con dependencias o sin ellas,según quiera escuchar por cambios en un elemento en concreto o por todos los cambios).
+
+La última fase es al desmontarlo(componentWillUnmount o return del UseEffect)
+
+NOTA:es muy importante entender que en un useEffect con dependencias si actualizo una dependencia puedo entrar en un bucle infinito.
+
+El operador cortocircuito es muy usado en React:
+{isLoged && <Login />}
+NOTA:si tengo una lista que no va a cambiar puedo usar el index del map(item,index).En cuanto se pueda borrar o cambiar algo de esa lista deberé usar otra cosa como index a la key.
+
+NOTA:en React con clases el state siempre es un objeto:
+class MyForm extends React.Component {
+  state={
+   name:'',
+   age:0,
+   description:'',
+  }
+
+NOTA:un componente controlado es aquél que está ligado al estado de React.Esto se realizar automáticamente en cuanto use la propiedad value={state} en un control.
+Cualquier control con el value y el onChange+name es un componente controlado.
+
+NOTA:para usar la etiqueta <select> puedo elegir una opción como seleccionada dandole un value a la tag <select>.Esto es el equivalente en HMTL a usar el atributo selected en una <option>
+
+EN HTML eligo así una opción:
+<select >
+  <option selected value="red">Red</option> <- Red estará por defecto
+  <option value="green">Green</option>
+
+En React se usa value,un stateInitial y un componente controlado:
+const [color,setColor]=useState("orange")
+<select value={color} onChange={handleSelect}>
+  <option value="orange">Orange</option>
+  <option value="red">Red</option>
+</select>
+
+NOTA:recuerda que en JSS puedo usar cualquier prop como value
+const Text = props => <p style={{color:props.color}}>texto</p>;
+Como color le puedo pasar incluso una prop.Memoriza esto
+
+NOTA:fijate en este ejemplo,como va a renderizarse dos veces el componente:
+
+const  [users,setUsers]=useState([]);
+
+async componentDidMount(){
+useEffect( ()=> {
+  fetchUsers(url).then(resp => setUsers(resp['data'])...
+},[])
+
+return(
+  {users.length === 0 && <h1>Loading...</h1>}
+  <ul>
+   {users.map(user=>...
+
+Fijate que cuando nazca el componente necesitará unos instantes para pedir los usuarios y meterlos al state,y como ese setUsers va a re-renderizar el componente.Es totalmente obvio que este componente se va a pintar dos veces,una con users=[] y por tanto mostrando el Loading y otra cuando los pida y el setUsers haga renderizarse al componente de nuevo.Entender el flujo que tomarán los datos y los re-rendiring es fundamental.Sigue avanzando.
+
+							INTRO AL TESTING CON JEST
+
+Jest ya viene integrado con create-react-app.Me permite ejecutar test sobre funciones,usar test(),expect,etc.NO tengo que instalarlo porque viene integrado,sin embargo no permite testear componentes de React.
+
+Enzyme es una librería para testear componentes(la cual tengo que instalar junto con su adapter).Habrá que configurar pues a jest para que sepa como trabajar con enzyme y ese adaptador(en el archivo setupTests.js):
+
+import Enzyme from 'enzyme';
+import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
+
+import { createSerializer } from 'enzyme-to-json';
+
+Enzyme.configure({ adapter: new Adapter() });
+
+expect.addSnapshotSerializer(createSerializer({mode: 'deep'}));
+
+NOTA:cualquier modificación que realize en el setupTests se aplicará a todos los archivos de testing del proyecto.Asi pues,es el lugar donde puede importar los types(fijate que ya lo hacen ellos esto) o crear una bases de datos en memoria para cada test como hice en el curso de microservicios 
+* Puedo observar que jest ya que me deja en el setupTests.js este import para que lo tenga en cada test:
+import '@testing-library/jest-dom'; <- para que borrarlo entonces??
+
+Enzyme me dará acceso a los métodos shallow,mount o render.
+
+				SHALLOW VS MONUNT VS RENDER:
+
+Shallow(Element.JSX):wrapper 
+1- No renderiza los hijos
+2- Es perfecto si quiero testear solo ese componente(muy eficiente por el 1 y 3)
+3- No pasa por componentDidMount ni por componentDidUpdate
+Shallow siempre recibe un componenteJSX y devuelve un wrapper,con el cual puedo acceder a find,etc...
+import { shallow } from 'enzyme';
+const wrapper = shallow(<Link />)
+expect(wrapper.find('a').lenght).toBe(1) <- espero encontrar una <a>
+
+Mount(Element.JSX):wrapper
+1- Si renderiza a todos los hijos
+2- Suele tardar más en ejecutar el test
+3- Pasa por todos los ciclos de vida
+Imaginando esta estructura,con mount veré a Link,luego puedo testear sobre él:
+  <Text>
+    <Link>
+  </Text>
+import { mount } from 'enzyme';
+const wrapper = mount(<Text />);
+expect wrapper.find('a').length).toBe(1) <- espero encontrar esa <a> pero desde el padre!.Perfecto,queda bien claro las mejoras y desventajas de mount(),y queda claro que si usará shallow no vería a esa tag <a>.
+Recuerda que pasa por TODOS los hijos!
+
+Método render(Element.JSX):wrapper
+1-también renderiza todos los hijos
+2- pero sólo para por el ciclo de vida render
+3- es por ello un poco más eficiente que mount
+  <Text>
+    <Link>
+  </Text>
+import { render } from 'enzyme';
+const wrapper = render(<Text />);
+expect wrapper.find('a').length).toBe(1) <- dado que no uso ningun ciclo de vida pasará el test también.Investigar más sobre el uso de ciclos de vida en el testing,y cuando puedo usar render sobre mount o si debo hacerlo.
+
+				MATCHERS MÁS USADOS
+
+1. at(index) devuelve un wrapper del nodo en esa posición
+expect(wrapper.find('h1').at(1).contains('Hola mundo')).toBe(true) <- espero que el segundo h1 tenga ese texto
+
+2- childAt(index) devuelve un wrapper del hijo en esa posición:
+expect(wrapper.find('ul').childAt(0).type()).to.equal('li'); <- espero que su primer hijo sea un li.Perfecto
+
+3- children() devuelve un wrapper con todos los hijos:
+expect(wrapper.find('ul').children()).to.have.lengthOf(items.length);
+
+4- contains(nodeOrNodes):bool
+expect(wrapper.contains('Hola')).toBe(true) <- que contenga ese elemento,un string en este ejemplo
+
+5- html() string devuelve el html de un nodo como string 
+const wrapper = shallow(<Greeting>Hola</Greeting>)
+expect(wrapper.html()).toBe("<h1>Hola</h1>")
+
+6-  props() object devuelve las props que se le pasan al componente raiz del wrapper 
+const wrapper = shallow(<Greeting text="hola" otraProp="nope" />,)
+expect(wrapper.props().text).toBe("hola")
+
+7- setProps es útil para testear el comportamiento del componente cuando cambian sus props 
+const wrapper = shallow(<Greeting text="hola" otraProp="nope" />,)
+expect(wrapper.props().text).toBe("hola")
+wrapper.setProps({ text: 'adios' })
+expect(wrapper.props().text).toBe("adios")
+
+8- instance() ReactComponent devuelve la instancia de la clase y podemos acceder a sus propiedades
+const wrapper = shallow(<CounterText />,)
+expect(wrapper.find('div').text()).toBe('')
+wrapper.instance().increment()
+expect(wrapper.find('div').text()).toBe('a')
+
+9- state() object devuelve un objeto con los datos del estado 
+const wrapper = shallow(<CounterText />,)
+expect(wrapper.state().text).toBe('')
+wrapper.instance().increment()
+expect(wrapper.state().text).toBe('a')
+
+10- simulate(event, data) simula un evento en el nodo raíz del wrapper 
+const wrapper = shallow(<CounterText />,)
+wrapper.find('button').at(0).simulate('click')
+expect(wrapper.state().text).toBe('a')
+
+Dejo esto en varios lugares para acceder a esta información.Recalcar contains() o childAt() o children() pues parecen útiles.
+instance() o increment() son sólo para clases pues necesitan una instancia.
+
+Fijate que cuando simule clicks etc,tengo que tener en cuenta si la app va a renderizar un hijo,ya que eso me obligaría a usar mount.
+
+NOTA:por último puedo ver cuanta cobertura doy a mi proyecto usando:
+scripts:{
+  "coverage":"react-scripts test --coverage"
+Este nuevo comando sacará una tabla con los archivos del proyecto y un porcentaje con la covertura.Esto es útil cuando hay un acuerdo en el proyecto de por ejemplo cubrir un 60& del código 
+
+							CAMBIOS DE CLASES A HOOKS
+
+IMPORTANTE: EN Javascript las clases no existen(son sugar syntactic), y al transpilar el código React hacía una serie de transformaciones que eran menos eficientes que los hooks.Éste es uno de los motivos por los que se emigró a los hooks
+
+El objeto state={} de las clases ahora se transforma en uno o múltiples useState,según cuántos necesite.
+
+NOTA:si tengo una función con dos setters de un useState esto sólo dispara un renderizado,no dos:
+const handleClick = () => {
+  setUsers(data);
+  setLoading(false);
+} <- esto no dispara dos,ya que están en una función,sólo dispara un cambio
+
+El componentDidMount ahora es un efecto con un [] como dependencias.
+El componentWillUnmount es un efecto con un return(useEffect( () => { return () => {codigo para el onDestroy} })
+
+Los hooks y efectos en React hacen uso de las closures de Javascript.
+
+

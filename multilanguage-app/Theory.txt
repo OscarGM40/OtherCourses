@@ -2,6 +2,8 @@
 
 Source: https://www.youtube.com/watch?v=w04LXKlusCQ
 
+
+NPTA: puedo usar npx create-react-app <nombre> --template clean-cra para que la template inicial no tenga tantos archivos
 React-i18next es un framework de internacionalización para React/React-native basado en i18next.
 
 Documentacion oficial: https://react.i18next.com/

@@ -1,0 +1,220 @@
+					BUILD A CUSTOM AUDIO PLAYER IN REACT
+
+Source: https://www.youtube.com/watch?v=sqpg1qzJCGQ&list=PLrz61zkUHJJGLD5qlJSYfbm0Gh1Ri1Rt0
+
+Empezamos creando un proyecto con next:
+npm create--next-app
+
+Next es bastante sencillo,recuerda que al crear un file en pages creará una url.Recuerda también que el _app.js es el punto inicial de partida,es como el index.js.
+En la  carpeta api puedo crear una api.De momento vayamos al front.
+
+En cuanto al css recuerda que hay que usar su convención,que es escribir el file como xxx.module.css e importarlo(dado que es una export default) como cualquier nomre,aunque styles es una convención:
+	
+import styles from '../styles/Home.module.css'
+
+Ya solo me falta referenciar a las clases de ese archivo con la nomenclatura del punto:
+
+ <div className={styles.container}> <- clase container de ese archivo.
+
+Perfecto.Lógicamente dejo sólo las clases container y main.
+
+Creo un componente y el folder components antes de lo primero.Antes que nada veamos la documentación para la etiqueta <audio>
+
+			ETIQUETA <AUDIO>
+
+Si voy a w3Schools veré que hay tres apartados para la etiqueta audio.El primero muestra este código:
+
+1º:
+<audio controls>
+  <source src="horse.ogg" type="audio/ogg">
+  <source src="horse.mp3" type="audio/mpeg">
+Your browser does not support the audio element.
+</audio>
+
+Simplemente es meter sources con diferentes archivos de audio.Mostrará un pequeño reproductor el browser.
+
+2º: El segundo está más abajo,en HTML references.Aqui voy a tener que entender que es el DOM.Cuando un Html se carga se crea un DOM,un arbol de referencias a las etiquetas,a los elementos html que crearon la página.
+Mediante el DOM puedo borrar y construir nuevos elementos html.
+
+NOTA:las devTools muestran el DOM.Bien,lo importante es que esta segunda parte son los métodos y propiedades que puedo usar(lógicamente mediante Javascript) manipulando el DOM para interactuar con esa tag <audio>
+IMPORTANTE: los métodos de acceso por DOM también valen para la tag <video>
+Puedo ver métodos como load,play,pause.Veamos esa info:
+
+		MÉTODOS DOM PARA MANIPULAR AUDIO Y VIDEO HTML5 TAGS
+
+Method	        Description
+addTextTrack()	Adds a new text track to the audio/video
+canPlayType()	Checks if the browser can play the specified audio/video type
+load()	        Re-loads the audio/video element
+play()	        Starts playing the audio/video
+pause()	        Pauses the currently playing audio/video
+
+Puedo ver que puedo añadir una canción fácil o refrescar la canción.Genial.
+
+Property	   Description
+audioTracks	Returns an AudioTrackList object representing available audio tracks
+autoplay	Sets or returns whether the audio/video should start playing as soon as it is loaded
+buffered	Returns a TimeRanges object representing the buffered parts of the audio/video
+controller	Returns the MediaController object representing the current media controller of the audio/video
+controls	Sets or returns whether the audio/video should display controls (like play/pause etc.)
+crossOrigin	Sets or returns the CORS settings of the audio/video
+currentSrc	Returns the URL of the current audio/video
+currentTime	Sets or returns the current playback position in the audio/video (in seconds)
+defaultMuted	Sets or returns whether the audio/video should be muted by default
+defaultPlaybackRate	Sets or returns the default speed of the audio/video playback
+duration	Returns the length of the current audio/video (in seconds)
+ended	Returns whether the playback of the audio/video has ended or not
+error	Returns a MediaError object representing the error state of the audio/video
+loop	Sets or returns whether the audio/video should start over again when finished
+mediaGroup	Sets or returns the group the audio/video belongs to (used to link multiple audio/video elements)
+muted	Sets or returns whether the audio/video is muted or not
+networkState	Returns the current network state of the audio/video
+paused	Returns whether the audio/video is paused or not
+playbackRate	Sets or returns the speed of the audio/video playback
+played	Returns a TimeRanges object representing the played parts of the audio/video
+preload	Sets or returns whether the audio/video should be loaded when the page loads
+readyState	Returns the current ready state of the audio/video
+seekable	Returns a TimeRanges object representing the seekable parts of the audio/video
+seeking	Returns whether the user is currently seeking in the audio/video
+src	Sets or returns the current source of the audio/video element
+startDate	Returns a Date object representing the current time offset
+textTracks	Returns a TextTrackList object representing the available text tracks
+videoTracks	Returns a VideoTrackList object representing the available video tracks
+volume	Sets or returns the volume of the audio/videoTracks
+
+Puedo ver propiedades tan útiles como duration o src.
+Por último estos son los eventos a los que tengo acceso y en los que puedo hacer algo:
+
+Event	           Description
+abort	Fires when the loading of an audio/video is aborted
+canplay	Fires when the browser can start playing the audio/video
+canplaythrough	Fires when the browser can play through the audio/video without stopping for buffering
+durationchange	Fires when the duration of the audio/video is changed
+emptied	Fires when the current playlist is empty
+ended	Fires when the current playlist is ended
+error	Fires when an error occurred during the loading of an audio/video
+loadeddata	Fires when the browser has loaded the current frame of the audio/video
+loadedmetadata	Fires when the browser has loaded meta data for the audio/video
+loadstart	Fires when the browser starts looking for the audio/video
+pause	Fires when the audio/video has been paused
+play	Fires when the audio/video has been started or is no longer paused
+playing	Fires when the audio/video is playing after having been paused or stopped for buffering
+progress	Fires when the browser is downloading the audio/video
+ratechange	Fires when the playing speed of the audio/video is changed
+seeked	Fires when the user is finished moving/skipping to a new position in the audio/video
+seeking	Fires when the user starts moving/skipping to a new position in the audio/video
+stalled	Fires when the browser is trying to get media data, but data is not available
+suspend	Fires when the browser is intentionally not getting media data
+timeupdate	Fires when the current playback position has changed
+volumechange	Fires when the volume has been changed
+waiting	Fires when the video stops because it needs to buffer the next frame
+
+Puedo ver eventos como play o pause,loadeddata,ended,...Sea como sea hay que aprender a añadir canciones a una cola.
+
+Por último estos son los atributos de la tag(no los del DOM):
+
+Attribute	    Value            	Description
+autoplay	   autoplay	Specifies that the audio will start playing as soon as it is ready
+controls	   controls	Specifies that audio controls should be displayed (such as a play/pause button etc)
+loop	       loop	Specifies that the audio will start over again, every time it is finished
+muted	       muted	Specifies that the audio output should be muted
+preload	       auto
+metadata
+none	Specifies if and how the author thinks the audio should be loaded when the page loads
+src	URL	Specifies the URL of the audio file
+
+Los dos últimos,preload y src los voy a usar.
+
+Bien,en cuanto a los iconos Amy recomienda instalar react-icons.Es una libreria que junta los iconos de otras,como los de bootstrap,font-awesome,material design,..Al elegir un icono me traigo sólo ese icono,no toda la libreria, y como puedo ver tengo acceso a varias librerias:
+>npm install react-icons
+La documentación está aquí:
+https://react-icons.github.io/react-icons
+
+Para usar bien esta libreria eligo un icono y lo importo.Para saber de donde viene exactamente lo indica un pequeño prefijo:
+
+import { BsFillArrowLeftSquareFill } from 'react-icons/bs'; <- bs es de bootstrap.Todos los iconos tienen el prefijo que coincide con la carpeta.Genial
+
+import { FaPlay } from 'react-icons/fa';
+import { FaPause } from 'react-icons/fa';
+Estos dos son de FontAwesome.Perfecto,ya tengo los iconos.
+
+<button><BsArrowLeftShort /> 30</button>
+<button><FaPlay /> play / pause</button>
+<button><BsCaretRightSquareFill />30</button>
+
+Estilar el input type range va a ser complicado,dado que cada browser lo estiliza como quiere(seguir video).
+
+NOTA: useState es asíncrono asi que cuando actualizo mi toggleButton al establecer setIsPlaying a su opuesto no tiene tiempo de retroceder 
+
+					CONECTAR LA DURATION
+
+ NOTA:fijate la buena idea de Amy de crear las zonas para state y references.
+Para calcular la duration ya está la propiedad duration de la tag <audio> que tengo en la reference:
+
+  useEffect(() => {
+    const seconds = Math.floor(audioPlayer.current.duration);
+      setDuration(seconds);
+  },[audioPlayer?.current?.loadedmetadata, audioPlayer?.current?.readyState])
+
+  const calculateTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const returnedMinutes = minutes < 10 
+      ? `0${minutes}` 
+      : minutes;
+    const secondsLeft = Math.floor(seconds % 60);
+    const returnedSeconds = secondsLeft < 10 
+      ? `0${secondsLeft}` 
+      : secondsLeft;
+    return `${returnedMinutes}:${returnedSeconds}`;
+  }
+
+Además creo una función normalizadora.Pero fijate que a veces sale Nan.¿Como evitarlo?Fácil,solo lo muestro si existe el state local duration y además no es Nan:
+
+   <div className={styles.duration}>{
+      (duration && !isNan(duration)) && calculateTime(duration)}</div>
+Genial.Veamos ahora como saber el currentTime y el input type range
+
+			ESTABLECER EL CURRENT TIME Y EL RANGE
+
+Para almacenar el valor un state me valdrá.De nuevo la APi proporciona la propiedad currentTime,asi que fácil:
+const [ currentTime, setCurrentTime ] = useState(0);
+
+Para el range mejor creamos una reference al input.Puedo ver que tiene la propiedad max:
+ progressBar.current.max = seconds;
+
+      <div>
+        <input type="range" 
+          className={styles.progressBar} 
+          ref={progressBar}
+          onChange={handleRange}
+          defaultValue={0}/>
+      </div>
+
+const handleRange = (e) => {
+  audioPlayer.current.currentTime = progressBar.current.value;
+  progressBar.current.style.setProperty('--seek-before-width', `${progressBar.current.value/duration*100}%`);
+  setCurrentTime(progressBar.current.value);
+}
+
+		REQUEST ANIMATION FRAME FUNCTION
+
+Con requestAnimationFrame puedo decirle al browser que tengo una función a ejecutar justo antes de que se repinte de nuevo.
+
+const animation = requestAnimationFrame(doThis) 
+cancelAnimation
+Además,puedo cancelar la animación cuando quiera(en este caso al pausar o no estar en modo playbackRate)
+Dado que hemos dicho que va junto a la funcionalidad play/pause la función togglePlayPause es su lugar:
+
+  const togglePlayPause = () => {
+    setIsPlaying(!isPlaying);
+
+    if (isPlaying) {
+      audioPlayer.current.pause();
+    animationRef.current = requestAnimationFrame(whilePlaying);
+    } else {
+      audioPlayer.current.play();
+      cancelAnimationFrame(animationRef.current);
+    }
+  };
+
+
