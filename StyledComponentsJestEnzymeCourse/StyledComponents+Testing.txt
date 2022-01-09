@@ -234,4 +234,179 @@ El componentWillUnmount es un efecto con un return(useEffect( () => { return () 
 
 Los hooks y efectos en React hacen uso de las closures de Javascript.
 
+NOTA:React sólo muestra la pila de errores en modo desarrollo.Lo decidieron así para que como programador siempre recibas feedback y sea imposible enmascararlos.Sin embargo,puedo crearme un componente Wrapper a mostrar cuando haya un error:
+const ComponenteError=(props)=>{
+if(props.hasError){
+ return <div>Hay un error</div>
+}else{
+return props.children
+}
+Cuando haya un error retornaré lo que quiera y si no lo hay devuelvo el componente simplemente.
 
+					PROPTYPES
+
+Aquí hay un ejemplo que documenta los diferentes tipos de validadores: 
+import PropTypes from 'prop-types';
+			//OPCIONALES
+ MyComponent.propTypes = {
+optionalArray: PropTypes.array,
+optionalBool: PropTypes.bool,
+optionalFunc: PropTypes.func,
+optionalNumber: PropTypes.number,
+optionalObject: PropTypes.object,
+optionalString: PropTypes.string,
+optionalSymbol: PropTypes.symbol,
+  // Cualquier cosa que sea interpretada: números, cadenas, elementos o un array
+// (o fragment) que contengan estos tipos.
+optionalNode: PropTypes.node,
+  // Un elemento de React
+optionalElement: PropTypes.element,
+  // Un tipo de elemento React (ej. MyComponent).
+optionalElementType: PropTypes.elementType,
+  // Además puedes declarar que una prop es una instancia de una clase. Este usa
+// el operador instanceof de JS.
+optionalMessage: PropTypes.instanceOf(Message),
+  // Puedes asegurar que una prop esta limitada a valores específicos si se
+// considera como enum.
+optionalEnum: PropTypes.oneOf(['News', 'Photos']),
+  // Un objeto que puede ser de diferentes tipos
+optionalUnion: PropTypes.oneOfType([
+PropTypes.string,
+PropTypes.number,
+PropTypes.instanceOf(Message)
+]),
+  // Un array de determinado tipo
+optionalArrayOf: PropTypes.arrayOf(PropTypes.number),
+  // Un objeto con valores de propiedad de determinado tipo
+optionalObjectOf: PropTypes.objectOf(PropTypes.number),
+  // Un objeto que tenga determinada estructura
+optionalObjectWithShape: PropTypes.shape({
+color: PropTypes.string,
+fontSize: PropTypes.number
+}),
+  // Un objeto con advertencias sobre propiedades adicionales
+optionalObjectWithStrictShape: PropTypes.exact({
+name: PropTypes.string,
+quantity: PropTypes.number
+}),
+  // Puedes encadenar cualquiera de los anteriores con `isRequired` para asegurar
+// que se muestre una advertencia si la prop no se suministra.
+requiredFunc: PropTypes.func.isRequired,
+  // Un valor de cualquier tipo
+requiredAny: PropTypes.any.isRequired,
+// También puedes suministrar un validador personalizado. Debe retornar un objeto Error
+// si la validación falla. No uses `console.warn` o throw, porque no va a funcionar en
+// `oneOfType`
+customProp: function(props, propName, componentName) {
+if (!/matchme/.test(props[propName])) {
+return new Error(
+'Invalid prop `' + propName + '` supplied to' +
+' `' + componentName + '`. Validation failed.'
+);
+}
+},
+  // También puedes suministrar un validador personalizado a `arrayOf` y `objectOf`.
+// Debe retornar un objeto Error si la validación falla. El validador se llamará
+// por cada key en el array o el objeto. Los primeros dos arguments del validador
+// son el array o el objeto, y la key del elemento actual.
+customArrayProp: PropTypes.arrayOf(function(propValue, key, componentName, location, propFullName) {
+if (!/matchme/.test(propValue[key])) {
+return new Error(
+'Invalid prop `' + propFullName + '` supplied to' +
+' `' + componentName + '`. Validation failed.'
+);
+}
+})
+};
+Dejar el md por ahi para consultarlo.Fijate que ahora ya viene con react pero antes era una libreria externa que había que instalar.Fijate que siempre son un objeto.
+Siempre es:
+ComponentName.propTypes = {
+  label:PropTypes.string.isRequired, <- puedo decir que es requerida
+  name:PropTypes.string, <- o decir que es opcional
+
+Puedo poner valores por defecto con defaultProps:
+ComponentName.defaultProps ={
+  to:'http:/goggle.com',
+}
+				SECCION 06 STYLED COMPONENTS
+
+Esta libreria se usa mucho.Se instala como cualquier dependencia:
+npm i styled-components -S
+
+Al usarla puedo crearme componentes estilizados:
+import styled from 'styled-components';
+
+const Button = styled.button`
+  background-color: black;
+`;
+
+Por detŕas esto va a crear un <button class="sdkhf34h">,es decir un botón con una clase con un hash único,con lo que nunca va a chocar con otro estilo en mi app
+
+Puedo estilizar una propiedad css en base a las props.Imaginando esto:
+<Button warning>
+<Button danger>
+
+const Button = styled.button`
+ color: ${props => props.color || 'green'}
+`;
+La sintaxis es ${props => expresión}.Siempre es una callback en una JSX.
+Esto se puede complicar más,pasando una regla css entera usando la función css:
+
+${props => props.info && css`
+  background-color:blue;
+   border: 2px solid blue;
+   color:white;
+`;
+${props => props.danger && css`
+  background-color:red;
+   border: 2px solid red;
+   color:white;
+`;
+			HERENCIA EN STYLED COMPONENTS
+
+Puedo heredar de un componente estilizado.Imagina que tengo un componente Button y quiero crear un TomatoButton con el borde,padding,etc del primero pero con otros colores.Para heredar es tán fácil como usar styled(Component)`` pasandole un componente por argumento:
+
+import Button from '../Button' <- el componente ya estilizado con styled
+ const ChildButton = styled(Button)`
+  background-color:tomato;
+  border-color:tomato;
+`; <- sobreescribirá estas dos propiedades y tomará todas las restantes de las que tenga el padre
+
+Puedo ver que la herencia y el renderizado según props es algo muy potente.
+
+Con styled-components también tengo acceso al método keyframes que me permite almacenar una animacíon en una constante para despues usarla donde quiera:
+
+const rotate = keyframes`
+  from{
+    transform: rotate(0deg);
+  }
+  to{
+  transform: rotate(360deg);
+}`;
+
+Luego la infiero con una JSX simplemente.
+const TomatoButton = styled(Button)`
+  animation:${rotate} 2s linear infinite;
+`;
+
+Styled-components también me da un HOC ThemeProvider en el que puedo importar mis propios colores,algo que se hace mucho en empresa.
+
+En algun lugar definiré mis propios colores:
+
+const theme = {
+  main:'tomato';
+  secondary:'blue'
+}
+
+En un punto alto,como el App.js me importaría ese archivo y proveeré a toda la app de ese theme(que es un simple objeto con mis colores):
+return (
+  <ThemeProvider theme={theme}>
+    <App />
+  </ThemeProvider>
+
+Luego tendría acceso mediante una callback al theme en cualquier styled componente:
+cont ChildButton = styled(Button)`
+  background-color: ${props => props.theme.main || white};
+`;
+
+Es una forma muy buena de unificar los colores,además usar un ThemeProvider es algo muy común.
