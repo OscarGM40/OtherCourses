@@ -1,0 +1,16 @@
+service: aws-lambda-node-restapi
+frameworkVersion: '2 || 3'
+
+provider:
+  name: aws  #el provider o Cloud al que subir la funcion
+  runtime: nodejs12.x #runtime para ejecutarla
+  lambdaHashingVersion: '20201221' # Id único de la función 
+  region: eu-west-2 #region donde subir la función
+functions:
+  hello: #nombre de la funcion
+    handler: handler.hello # nombreDelArchivo.nombreDeLaFuncion
+    #dado que viene de handler.js,será handler.helll
+    events:
+      - httpApi:
+          path: /  # ruta de la funcion
+          method: get # metodo de la funcion
