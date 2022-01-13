@@ -62,3 +62,70 @@ export const GREETING = {
 }
 
 					CONECTAR MYSQL MEDIANTE TYPEORM
+
+Para conectar a Mysql recuerda que hemos instalado mysql y el orm TypeORM:
+
+NOTA: TypeORM soporta MySQL / MariaDB / Postgres / CockroachDB / SQLite / Microsoft SQL Server / Oracle / SAP Hana / sql.js y MongoDB NoSQL database. 
+
+Realmente es bastante sencillo usar este ORM,aunque pide varias propiedades no es nada complejo.Perfecto:
+
+import { createConnection } from 'typeorm';
+
+export const connectDB = async () => {
+    await createConnection({
+      type: 'mysql',
+      host: '0.0.0.0',
+      port: 3307, // el port va como number
+      username: 'root',
+      password: 'root',
+      database: 'graphql-typeorm-fazt', <- la DB debe existir!
+      entities: [],
+      synchronize: true, // si no existen las tablas la crea
+      ssl: false, //como es local iremos sin ssl
+    });
+}
+
+Si tuviera problemas con el usuario(que los tuve) porque no tiene la autorización para identificarse:
+>ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'passwordDesired'; <- ojo con el localhost
+>flush privileges;
+Aparte la database debe existir(hay una librería llamada typeorm-extension,usar npm i typeorm-extension,con esta librería puedo gestionar la creación de bases de datos desde el proyecto también)
+
+						ENTIDADES CON TYPEORM
+
+Ya hemos visto como conectarse fácil con el ORM TypeORM.Este ORM le llama entidades a las tablas,luego creo el folder entities.Es muy parecido a Spring en este sentido,usaré decoradores para agregar funcionalidad a clases,propiedades y métodos:
+IMPORTANTE:para poder usar decoradores en un proyecto tengo que habilitarlo en en tsconfig.json:
+ "experimentalDecorators": true, /* Enable experimental support for TC39 stage 2 draft decorators. */
+ "emitDecoratorMetadata": true,                    /* Emit design-type metadata for decorated declarations in source files. */
+Simplemente es descomentarlos.Recuerda que hice lo mismo con rootDir y outputDir.
+
+NOTA: esa clase con la entidad debe heredar de BaseEntity
+
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+
+@Entity({ name: 'users'})
+export class Users extends BaseEntity {
+  
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ type: 'varchar', length: 50 })
+  name: string;
+  
+  @Column({ type: 'varchar', length: 50 })
+  email: string;
+  
+  @Column({ type: 'varchar', length: 255 })
+  password: string;
+  
+}
+IMPORTANTE: siempre debe haber una @PrimaryColumn minimo.En este caso como además queremos que sea autogenerada usaremos @PrimaryGeneratedColumn,pero hay que usar uno de los dos minimo.
+
+Puedo ver que tengo un error ya que no uso un constructor.Hay que habilitar esta feature también en el tsconfig.json(ya vamos 5),pero además cambiandola a false:
+ "strictPropertyInitialization": false,             /* Check for class properties that are declared but not set in the constructor. */ <- ojo que estaba en true
+
+Ya puedo obviar el tener que usar un constructor.Ahora bien,para usar esta entidad recuerda que teniamos un arreglo de entities en el createConnection.Hay que agregarla a ese arreglo para usarla.
+Y también poner synchronize a true.Bien,es hora de usar esta tabla.
+
+						CREATE USER MUTATION
+
+Minuto 46
