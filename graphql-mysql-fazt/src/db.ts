@@ -1,10 +1,6 @@
 
 
 
-
-
-
-
 /* la funcion createConnection me permite conectarme a una db */
 import { createConnection } from 'typeorm';
 import { Users } from './entities/User';
