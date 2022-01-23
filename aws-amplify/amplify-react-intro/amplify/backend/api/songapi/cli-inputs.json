@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "serviceConfiguration": {
+    "apiName": "songapi",
+    "serviceName": "AppSync",
+    "gqlSchemaPath": "/media/oscar/CRUCIALX6/OtherCourses/aws-amplify/amplify-react-intro/amplify/backend/api/songapi/schema.graphql",
+    "defaultAuthType": {
+      "mode": "AMAZON_COGNITO_USER_POOLS",
+      "cognitoUserPoolId": "authamplifyreactintrocf4456d8"
+    },
+    "additionalAuthTypes": [
+      {
+        "mode": "AWS_IAM"
+      }
+    ]
+  }
+}

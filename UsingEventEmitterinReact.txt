@@ -1,0 +1,62 @@
+
+
+Source: https://www.youtube.com/watch?v=E1QbP1MWpMc
+
+Dado que en React estoy forzado a usar herencia entre componentes(props) o si no a usar un gestionador de estados como redux puedo incurrir en errores.
+En este tutorial veré como usar events y saltarme tanto la herencia como el uso de redux.
+
+Para ello usaremos el paquete npm 'fbemitter' (viene de facebook-emitter).Es una implementación simple de un emisor o emitter que prioriza velocidad y simplicidad.Es similar a NodeEventEmitter.Asi pues lo primero es instalarla:
+npm i fbemitter
+
+Despues lo mejor es usar un archivo en el folder 'utils',por ejemplo.Fijate que EventEmitter es una clase,asi que habrá que exportar la instancia en singleton a toda la app:
+
+import { EventEmitter }  from 'fbemitter';
+export default new EventEmitter(); <-al final no importa el singleton
+
+IMPORTANTE: el método emit(eventType:string, data:any) lleva dos argumentos.El primero es un identificador para que otros puedan filtrar la data a través de ese identificador(como un canal en un stream),el segundo es la data en sí.
+
+Ahora cualquier componente puede emitir lo que quiera con la instancia de clase:
+
+import EventEmitter from "./utils/EventEmitter"; <- es la instancia
+
+const LinkComponent = () => {
+
+  const createNewLog = () => {
+    EventEmitter.emit('NewLog',{
+      text:'Hi from fbemitter',
+      createdAt: new Date().toISOString()
+    });
+  }
+  
+  return (
+  <div>
+    <h1 onClick={createNewLog}>Link Component Click on Me!</h1>
+  </div>
+  );
+};
+
+export default LinkComponent;
+
+
+Y ahora cualquier otro componente puede escuchar a ese tópico con EventEmitter.addListener(identifier,function).Fijate en lo apropiado de poder ejecutar una función en cada emisión.
+
+const Label = () => {
+
+  const [ logs, setLogs ]= useState([]);
+
+  useEffect(() => {
+    const onNewLog = (eventData) => {
+      setLogs(prev => ({...prev,eventData}))
+    }
+    const listener = EventEmitter.addListener('NewLog', onNewLog);
+
+    return () => {
+      listener.remove();
+    }
+  },[])
+
+IMPORTANTE: EventEmitter.addListener devuelve una EventSubscription.Hay que cancelarla en el return(onDestroy) por motivos obvios
+Ojo con los nombres del canal,si lo llamo NewLog no es newLog.
+
+Pueden escuchar varios componentes además,diría que usa multi-casting.Investigar más.
+

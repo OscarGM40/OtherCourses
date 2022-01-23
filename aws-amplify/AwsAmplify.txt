@@ -1,0 +1,329 @@
+						AWS Amplify Series
+
+Source: https://www.youtube.com/watch?v=g4qKydnd0vU&list=PLmexTtcbIn_hvPcUm3oAufCtH7dwNAC-g&t
+
+Source Two: https://www.youtube.com/watch?v=X2qq_dmEils&list=PLrwNNiB6YOA2rrpLDwmTQfkDc_RQxufij
+
+			VIDEO 01 AWS AMPLIFY Y AWS AUT+AWS COGNITO
+
+AWS Amplify es un Baas,viene a ser muy parecido a Firebase.Tiene acceso a los siguientes submodulos:
+1- Authentication
+2- Storage
+3- DataStore
+4- Interactions
+5- Analytics
+6- API(GraphQL y REST)
+Y algunos más,como Push Notifications o PubSub para mandar emails o notificaciones a los usuarios a través de otros medios(whatsap,...)
+
+					AWS INITIAL SETUP(AWS-CLI)
+
+Lo primero sería instalar @aws-amplify/cli de forma global.Esta libreria es la herramienta cli para interactuar con AWS a través del comando <aws options suboptions> .
+Instalará de forma global la herramienta CLI para interactuar con AWS Amplify:
+
+>npm install -g @aws-amplify/cli
+
+Desde esto momento ya podré usar el comando <amplify> <options> <flags> de forma global.Puedo comprobar la instalación con aws version
+
+El primer comando que tengo para usar es <amplify configure>, con el cual puedo crear un IAM user y dejarlo como mi AWS Active User.
+>amplify configure
+
+Dado que ya tenia uno activo  puedo saltar este paso e ir directamente a amplify init,este comando crea el directorio amplify en el path donde me encuentre,autenticandome contra el user actual que tenga en la CLI,el comando anterior crea ese  usuario).
+>amplify init
+
+Con amplify init enlazaré el proyecto donde esté(debo estar en la raiz de un proyecto) creando una carpeta 'amplify' y enlazando ese proyecto con el AWS Activo.
+Me pedirá un nombre de proyecto(cualquiera),un environment(dev) y el IDE,tipo de app(Javascript) y framework(React.El entryPath(src) y distributionPath(build)
+IMPORTANTE:me preguntará si quiero usar un AWS Profile,le digo que si y eligo uno.
+Todo este comando amplify init va a crear un folder llamado 'amplify' en el proyecto con las credenciales del aws-user logeado activo:
+
+Your project has been successfully initialized and connected to the cloud!
+Some next steps:
+"amplify status" will show you what you've added already and if it's locally configured or deployed
+"amplify add <category>" will allow you to add features like user login or a backend API
+"amplify push" will build all your local backend resources and provision it in the cloud
+"amplify console" to open the Amplify Console and view your project status
+"amplify publish" will build all your local backend and frontend resources (if you have hosting category added) and provision it in the cloud
+
+Pro tip:
+Try "amplify add api" to create a backend API and then "amplify push" to deploy everything
+
+   							AMPLIFY AUTH MODULE
+
+Bien,ahora ya puedo ir añadiendo features con amplify add <module> así que añadimos la Auth de ellos.
+
+>amplify add auth
+
+* De momento no eligo redes sociales ni nada complejo.Ya lo veré más adelante.
+Hago el amplify push para subirlo todo.Esto interactuará con AWS Cognito y creará varios recursos.También me actualizará el aws-exports.json que se me creó con amplify init en el folder src del proyecto
+
+Puedo ver en todo momento qué features estoy agregando al proyecto actual con amplify status.
+
+Una vez seteado el módulo viene crear el código.Para cada framework cambiará,veamoslo en React de momento.
+Necesitaré instalar la dependencia core aws-amplify,la dependencia adapter para el HOC @aws-amplify/ui-react y traerme ese file con la configuración que AWS creó con el comando <amplify init>:
+
+/* AWS Setup  */
+/* UNO:traerse el archivo con la configuración */
+import awsconfig from './aws-exports';
+/* DOS traerse la libreria core aws-amplify */
+import Amplify from 'aws-amplify';
+/* TRES ME traigo su botón para el SignOut y el HOC,ojo,esto es version 1 */
+import { AmplifySignOut,withAuthenticator } from '@aws-amplify/ui-react';
+
+/* Configuro este proyecto */
+Amplify.configure(awsconfig);
+
+const App = () => {
+  return (
+    <div> 
+      <AmplifySignout />
+      <h3>Welcome to my App</h3>
+      
+    </div>
+  )
+}
+
+export default withAuthenticator(App);
+
+IMPORTANTE:esto ya no va asi.Para usar esta forma puedo hacer downgrade a la 1.2.5"dependencies": {
+    "@aws-amplify/ui-react": "^1.2.5",
+}
+O usar la forma en su versión 2,la actual:
+https://ui.docs.amplify.aws/components/authenticator
+No cambia mucho,ya no usa el HOC y el boton,usa otro HOC:
+
+import { Amplify } from 'aws-amplify';
+import { Authenticator } from '@aws-amplify/ui-react';
+import '@aws-amplify/ui-react/styles.css';
+import awsExports from './aws-exports';
+Amplify.configure(awsExports);
+
+export default function App() {
+  return (
+    <Authenticator>
+      {({ signOut, user }) => (
+        <main>
+          <h1>Hello {user.username}</h1>
+          <button onClick={signOut}>Sign out</button>
+        </main>
+      )}
+    </Authenticator>
+Probar con esta forma.
+
+Lógicamente si es la primera vez no podré logearme sino que tengo que crear un usario.Fijate que el registro de usuario es bajo aprobación tras confirmarlo con un código que recibiré en el email.
+
+El botón para el SignOut lo veré por ahí.Lógicamente este proyecto no es serio,pero puedo darme cuenta de lo fácil que fue implementar una Auth gestionada por terceros,con además activación por código tras envio de email.Investigar tarifas.
+
+			VIDEO 02 LINKING DYNAMODB with REACT and AWS Amplify
+
+Vamos a ver como enlazar una app de React con AWS Amplify y un backend con GraphQL,que supongo usará DYNAMODB como DB.Nos valdrá el proyecto anterior.
+REcuerda que creé una app de React y luego amplify init sobre ella.
+
+NOTA:para añadir un backend usaré <amplify add api>.Me dará a elegir entre GraphQL y REST.Me pedirá un name(songAPI)
+Como type of authorization puedo usar Amazon Cognito ya que tenemos AWS auth añadido(puedo usar una API key que mandaré entre peticiones o IAM)
+TAmbién editaremos el schema(eligo que no tengo uno,y creo uno de tipo single Object).Nuestro Object lucirá así:
+
+type Song @model {
+  id: ID!
+  title: String!
+  description: String
+  filePath: String!
+  like: Int!
+  owner: String!
+}
+
+Subo todo con 'amplify push'.Al final se me dará un endpoint al que podemos hacer hit con Postman,por ejemplo.
+IMPORTANTE:en este proceso se ha creado una DYNAMODB también.
+NOTA:parece que hay que ajustar las reglas para el schema.En AWS cada signed-in user se le conoce como un  'owner' al propietario del recurso o 'private' a alguien logeado correctamente:
+
+type Todo @model @auth(rules: [{ allow: private}]) {
+  content: String
+} <- cualquiera logeado puede crear,leer,editar y borrar Todos
+
+Lógicamente se debería ser más preciso:
+type Todo @model @auth(rules: [
+  { allow: public, operations: [read]}
+  { allow: owner }
+]) {
+  content: String
+} <- cualquiera puede leer,pero para crear,editar y borrar hay que estar signed-in
+
+Vuelvo a hacer el push,etc.Hora de hacer hit a ese endpoint con mi backend.
+
+IMPORTANTE: para acceder a mi api(amplify add api) me tengo que traer API del módulo core 'aws-amplify':
+import awsconfig from './aws-exports.js';
+import Amplify,{API} from 'aws-amplify'
+
+IMPORTANTE: en el proceso de creación del backend con GraphQL se me creó el folder graphql con todas las mutations(create,update y delete) y queries(getOne y getAll),asi que ya tenemos el nombre de la operación.Con todo esto puedo apuntar a la query de GraphQL ListSongs asi:
+
+ const [songs,setSongs] = useState([]);
+
+
+  const  fetchSong = async () => {
+    try {
+      const songData = await API.graphql(graphqlOperation(listSongs))
+      /* la data estará en res.data */
+      const songList = songData.data.listSongs.items;
+      console.log('songList',songList);
+      setSongs(songList);
+
+    } catch (error) {
+       console.log(error);
+    }
+  }
+Ese método graphqlOperation también viene de aws-amplify y lo usaré para realizar cualquier operación sobre mi API.Perfecto.
+Obviamente veré un arreglo vacío de canciones(puedo ir a DYNAMODB y veré una auto-generated Table).Fijate que en AWS un documento le llaman Item,y todos los documentos será Items(de ahí que usé songs.data.listSongs.items,donde listSongs es el método con la query)
+Sea como sea creamos un item desde el dashboard.Debería  poder verlo,aunque no lo hago.Seguir avanzando a ver si puedo crear songs.
+
+							AMPLIFY HOSTING 
+
+Source: https://www.youtube.com/watch?v=Kis1iYWIpi0&list=PLrwNNiB6YOA2rrpLDwmTQfkDc_RQxufij&index=9
+
+NOTA:paquetes adaptador segun framework
+@aws-amplify/ui-react
+@aws-amplify/ui-angular
+@aws-amplify/ui-vue
+@aws-amplify/ui-components
+@aws-amplify/react-native
+
+Obviamente inicio una app con amplify init antes de poder servirla.EN este punto hay que reseñar que es el módulo CloudFormation de AWS.
+Puedo tipear por CloudFormation y se me indicará los resources que tengo creados en AWS(siempre se agrupan en un stack además,por ejemplo un stack puede ser un user,una tabla y un role creados bajo ese stackID).
+
+Bien,los siguiente es instalar el módulo core aws-amplify y el adapter:
+>npm i aws-amplify @aws-amplify/ui-react 
+El adapter trae componentes que va a necesitar AWS
+
+IMPORTANTE: recuerda que el comando <amplify init> crea el aws-exports.js con la configuración de la zona y muchas otras,pero el .gitignore lo agregará por defecto.Hay que sacarlo del .gitignore
+
+Luego me traigo ese file para configurar la aplicación actual correctamente con esa configuración que haya en ese archivo:
+
+import awsconfig from './aws-exports';
+import Amplify from 'aws-amplify';
+
+Amplify.configure(awsconfig);
+
+Ahora si es hora de añadir una <category>,igual que he hecho con api y auth,tengo a hosting como category o modulo:
+>amplify add hosting
+En este punto puedo crear un repo y usar CD para que con cada push a ese repo se redespliegue la app.
+
+Bien,si voy a AWS y busco Amplify veré las aplicaciones.Si entro en una cualquiera veré que puedo desplegarla.Al final se generará un dominio con extensión .amplifyapp.com con un hash random.
+
+NOTA:puedo cambiarlo por un dominio custom,pero para ello hay que usar el módulo de AWS Route53(Scalable DNS and Domain Name Registration)
+Recuerda que habrá que cambiar los DNS del dominio para que apunten a los Nameservers de AWS
+Asi que AWS permite hostear y generar SSL(dandole un dominio válido que apunte a us Nameservers) y aparte también crea dominios .amplifyapp.com
+Al final creo que podría hacer lo mismo sin usar la CLI,pero no es importante esto.
+
+			WORKING WITH S3 FILES - AMPLIFY STORAGE TUTORIAL
+
+Source: https://www.youtube.com/watch?v=ZpdgHjbnef0&list=PLmexTtcbIn_hvPcUm3oAufCtH7dwNAC-g&index=3
+
+Vamos a ver como almacenar nuestras canciones en el modulo Storage de AWS.Storage es otra categoria de AWS asi que la debo añadir con amplify add storage
+<amplify add storage
+
+Me dará a elegir entre Content y crea una DB,elegimos Content ya que es para audios o fotos.Le doy un nombre identificativo a ese Storage y al bucket.
+Les doy permiso sólo a los registered y permisos de CRUD.No usaremos una lambda.
+Subo todo con amplify push
+NOTA:fijate que lo hice mal asi que puedo borrarlo con:
+It asks you to remove a specific resource as a part of the workflow when you run ampllify remove <category>. Optionally you can run amplify remove <category> <resource-name>
+Es decir <amplify remove storage> o bien <amplify remove storage songStorage>
+
+Para acceder a los files AWS me proporcionará una URL al recurso.Puedo y debo especificar un tiempo de vigencia de esa URL:
+
+import { Storage } from 'aws-amplify';
+
+    try {
+        const fileAccessURL = await Storage.get(songFilePath,{expires:600});
+        console.log('fileAccessURL', fileAccessURL);
+      } catch (error) {
+        
+      }
+Fijate que Storage viene de la librería core.Voy al dashboard y tipeo por s3.Debería ver el bucket recién creado.Entro en él y creo un folder 'public'.Entro a él y subo dos canciones.
+Ahora voy a la tabla y actualizo el name y el filePath.Lógicamente voy a tener el mismo problema,asi que empezaré de nuevo mañana una única vez más,ya que tampoco es importante para entender como funciona todo.
+amplify status <auth> -acm Model para ver permisos sobre el modelo
+
+Bien,solo era la regla de acceso a la DB.Bien,vamos a instalar react-player ahora que ya tengo acceso a la url con el archivo de audio.
+npm i react-player
+Ahora podré usar el Component <ReactPlayer> que es un simple <audio>.
+
+Fijate que puedo descargar el archivo al acceder a la URL si quiero asi:
+   const fileAccessURL = await Storage.get(songFilePath, {
+        download:true, expires: 600 });
+
+En el siguiente video veremos como subir files a S3
+
+				VIDEO 04 AMPLIFY ANALYTICS
+
+Fuente: https://www.youtube.com/watch?v=61vlNE4JeaM&list=PLrwNNiB6YOA2rrpLDwmTQfkDc_RQxufij&index=5
+Puedo añadir las analiticas con amplify add analytics.Tras añadirlo en local le hago el push a AWS
+
+Tras añadirlas puedo hacer seguimiento de por ejemplo,quien visita la pagina.Para ello necesitaré el modulo core que ya tengo aws-amplify,importar su clase Analytics y usar su método record en un efecto:
+import { Analytics } from 'aws-amplify';
+
+useEffect( () => {
+ Analytics.record("home page visited");
+ Analytics.record({
+  name:'album',
+  attributes:{},
+  metrics:...
+})
+},[]);
+
+También puedo activarlas con Analytics.enable o desactivarlas con Analytics.disable y mandar eventos mas complejos en Analytics.record que un simple string(parece que las propiedades deben ser name para dar un name a ese evento y attributes,etc.Investigar más si es necesario.
+
+Crearemos algo sencillo,lógicamente:
+ {
+   showAddSong
+     ? (<AddSong onUpload={() => {
+            setShowAddSong(false);
+			fetchSongs();
+        }} />)
+     : (<IconButton onClick={()=>setShowAddSong(true)} >
+           <Add />
+        </IconButton>)
+ }
+Un componente con un pequeño form y un botón para mostrarlo.En el uploadEvent ocultaremos el formulario.Es un evento personalizado creado por Sam.
+También cargará de nuevo las canciones(fetchSongs).
+El componente quedará algo como esto:
+   <div className="newSong" style={{width:"100%"}}>
+      <h3>Add a new song</h3>
+      <TextField label="Title"
+         value={songData.title}
+         onChange={(event) => setSongData({...songData, title: event.target.value})}
+         />
+      <TextField label="Artist" 
+          value={songData.owner}
+          onChange={(event) => setSongData({...songData, owner: event.target.value})}
+       />
+      <TextField label="Description" 
+          value={songData.description}
+          onChange={(event) => setSongData({...songData, description: event.target.value})}
+      />
+      <input
+        type="file"
+        onChange={(event) => setMP3Data(event.target.files[0])}
+        />
+
+Ahora si viene lo importante.Para subir algo a S3 se usará Storage.put(key,objectToUpload,config?):Promise.Fijate que es una promesa.
+
+La key es el nombre con el que guardaremos el archivo y debe de ser única.Usaremos uuid para ello:
+
+ const { key } = await Storage.put(`${v4()}.mp3`, MP3Data, {
+   contentType: 'audio/mpeg'
+ });
+
+* Creamos el $input para la mutation createSong
+
+  const createSongInput = {
+      id: v4(),
+      ...songData,
+      filePath: key,
+      like:0
+    }
+    console.log('createSongInput', createSongInput);
+    await API.graphql(graphqlOperation(createSong, { input: createSongInput }));
+
+Como puedo ver ha sido muy sencillo interactuar tanto con S3 como con la API.Realmente es muy interesante esto.
+
+				CUSTOMISING AMPLIFY LOGIN - AMPLIFY AUTH METHODS
+
+Fuente: https://www.youtube.com/watch?v=j-uDorqz958&list=PLmexTtcbIn_hvPcUm3oAufCtH7dwNAC-g&index=5&ab_channel=CompleteCoding
+
+En este video vamos a remover el HOC withAuthenticator y usar nuestra propia Auth.

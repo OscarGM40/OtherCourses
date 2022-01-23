@@ -1,0 +1,22 @@
+.songCard {
+  display: flex;
+  justify-content: space-around;
+  padding: 5px;
+}
+
+.songList {
+  display: flex;
+  flex-direction: column;
+  /* justify-content: space-around; */
+  /* padding: 5px; */
+}
+
+.songTitle {
+  font-weight: bold;
+  
+}
+
+.ourAudioPlayer {
+  display: flex;
+  justify-content: center;
+}
