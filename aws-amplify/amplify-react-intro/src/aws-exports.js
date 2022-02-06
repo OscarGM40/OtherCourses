@@ -24,7 +24,7 @@ const awsmobile = {
         "passwordPolicyCharacters": []
     },
     "aws_cognito_verification_mechanisms": [
-        "EMAIL"
+        "PHONE_NUMBER"
     ],
     "aws_appsync_graphqlEndpoint": "https://qx6stnjoxzam5fquvitno4gdnm.appsync-api.eu-west-2.amazonaws.com/graphql",
     "aws_appsync_region": "eu-west-2",

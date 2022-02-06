@@ -24,7 +24,20 @@ Instalará de forma global la herramienta CLI para interactuar con AWS Amplify:
 
 Desde esto momento ya podré usar el comando <amplify> <options> <flags> de forma global.Puedo comprobar la instalación con aws version
 
-El primer comando que tengo para usar es <amplify configure>, con el cual puedo crear un IAM user y dejarlo como mi AWS Active User.
+El primer comando que tengo para usar es <amplify configure>, con el cual puedo crear un IAM t [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    AssessLoggedInState();
+  },[])
+  
+  const AssessLoggedInState = () => {
+    Auth.currentAuthenticatedUser()
+      .then(() => {
+        setLoggedIn(true);
+      }).catch(() => {
+        setLoggedIn(false);
+      });
+  }ser y dejarlo como mi AWS Active User.
 >amplify configure
 
 Dado que ya tenia uno activo  puedo saltar este paso e ir directamente a amplify init,este comando crea el directorio amplify en el path donde me encuentre,autenticandome contra el user actual que tenga en la CLI,el comando anterior crea ese  usuario).
@@ -155,7 +168,6 @@ import Amplify,{API} from 'aws-amplify'
 IMPORTANTE: en el proceso de creación del backend con GraphQL se me creó el folder graphql con todas las mutations(create,update y delete) y queries(getOne y getAll),asi que ya tenemos el nombre de la operación.Con todo esto puedo apuntar a la query de GraphQL ListSongs asi:
 
  const [songs,setSongs] = useState([]);
-
 
   const  fetchSong = async () => {
     try {
@@ -322,8 +334,149 @@ La key es el nombre con el que guardaremos el archivo y debe de ser única.Usare
 
 Como puedo ver ha sido muy sencillo interactuar tanto con S3 como con la API.Realmente es muy interesante esto.
 
-				CUSTOMISING AMPLIFY LOGIN - AMPLIFY AUTH METHODS
+			VIDEO 05	CUSTOMISING AMPLIFY LOGIN - AMPLIFY AUTH METHODS
 
 Fuente: https://www.youtube.com/watch?v=j-uDorqz958&list=PLmexTtcbIn_hvPcUm3oAufCtH7dwNAC-g&index=5&ab_channel=CompleteCoding
 
-En este video vamos a remover el HOC withAuthenticator y usar nuestra propia Auth.
+IMPORTANTE: la clave de todo esto va a estar en la instancia Auth,mediante la cual usaré mi custom HTML llamando a sus funciones:
+
+import Amplify,{Auth} from 'aws-amplify';
+
+* Va a tener métodos para todo,SignIn,SignOut,Register,...(además casi siempre serán asíncronos por motivos obvios)
+
+En este video vamos a remover el HOC withAuthenticator(aún no,primero el logout) y usar nuestra propia Auth.Tras refactorizar como explica Sam empecemos con el botón de SignOut:
+
+Cambiaremos esto: 
+   <AmplifySignOut />
+ por mi button(en este caso un simple Button de Mui):
+
+  <Button
+     variant="contained"
+     label="Sign Out"
+     color="primary"
+     onClick={signOut} <- el botón llama a mi función
+  />
+La función usará el objeto Auth anterior para acceder a su método signOut:
+
+  const signOut = async () => {
+    try {
+     await Auth.signOut();
+    } catch (error) {
+      console.log('error', JSON.stringify(error, null, 2));      
+    }
+  }
+Puedo ver que es fácil.Lo siguiente será usar rutas.
+
+					REACT-ROUTING CON AWS AMPLIFY
+
+Añadirla rutas es muy sencillo.Instalo el router:
+    <Router>
+      <div>
+        {/* <AmplifySignOut /> */}
+        <Button
+          variant="contained"
+          label="Sign Out"
+          color="primary"
+          onClick={signOut}
+        >Sign Out</Button>
+        <h3>Welcome to my App</h3>
+        <br />
+        <br />
+        <Routes>
+          <Route path="/" element={<SongList />} />
+        </Routes>
+      </div>
+    </Router>
+
+Lo siguiente va a ser crear nuestro propio SigIn componente para registrarse.Ahora si ya remuevo el HOC withAuthenticator:
+export default withAuthenticator(App); <- cambiar por export default app;
+
+Bien,siguiendo el video creamos una función que devolverá si hay alguien logeado antes de nada(Auth.currentAuthenticatedUser().then ...)
+
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    AssessLoggedInState();
+  },[])
+  
+  const AssessLoggedInState = () => {
+    Auth.currentAuthenticatedUser()
+      .then(() => {
+        setLoggedIn(true);
+      }).catch(() => {
+        setLoggedIn(false);
+      });
+  }
+
+Y para el SignIn(Login) lo mismo.Fijate que te estas confundiendo con SignUp y era el Login:
+ 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      const user = await Auth.signIn(username, password);
+      console.log(user);
+      navigate("/");
+
+Simplemente es llamar a Auth.signIn(username,password).En este caso y según Amplify Auth tengo que mandar un username que será un email unique y la password.
+Podria crear otra ruta y crear el signup (con el método Auth.signUp().No lo haré,pero fijate que es muy sencillo usar la autenticación de otros,sólo hay que saber a qué método llamar,...
+
+  VIDEO 07 AMPLIFY GUEST USERS - GIVE LIMITED ACCESS TO USERS WITHOUT LOGGIN IN - 
+En este video vamos a ver como dar acceso a una parte de la app a usuarios sin autenticación ninguna.
+Tal como tenemos la app un usuario no podría acceder a la app sin hacer SignIn.Vamos a permitir fetchear las canciones sin tener que registrarse pero si tener que hacerlo para reproducirlas o darlas like:
+
+>amplify update auth
+Eligo Walkthrough all the configs
+eligo las opciones siguiendo el video y hago el push
+amplify push
+
+Si voy a Amazon Cognito y busco por Identity Pools veré un role llamado Unauthenticated role(en micaso es amplify-amplifyreactintro-dev-<number>-unauthRole).
+Lo busco con IAM en otra pestaña y le edito los permisos(no debería de tener niguno)
+Doy en crear politica y en JSON.Alli hay una serie de templates para crear politicas:
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": "appsync:GraphQL",
+            "Resource": [
+                "arn:aws:appsync:{REGION}:{ACCOUNT_NUMBER}:apis/{APPSYNC_API_ID}/types/Query/fields/listSongs",
+            ]
+        }
+    ]
+}
+
+La region es eu-west2.ACCOUNT_NUMBER lo puedo ver en micuenta.
+Para ver el Id de la app tengo que tipear 'AppSync'(lo veré ahi mismo o también en settings.
+Despues eligo entre Query o Mutation y le paso el nombre de la función.TAmbién añado en AppSync en vez de usar Cognito usar IAM(ver video).
+
+Ya por último voy al video y cambio la funcionalidad al llamar a la query listSongs para que lo haga con el authMode AWS_IAM ya que si lo hace por cognito fallará,pues Cognito va a usar la usersPools de los authenticated:
+
+const songData = await API.graphql({
+        query:listSongs,
+        authMode: 'AWS_IAM'
+      });
+
+NOTA: prefiero dejarlo cerrado.Pero el autor ahora dará acceso a reproducir las canciones también.Fijate que para ello hay que dar acceso a leer el S3BUcket
+ y por ello la template para la politica cambia:
+Repo con las templates: https://gist.github.com/SamWSoftware/75d40c8f1b680d1f5d205c898d79eb50
+
+Plantilla para acceder a s3:
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::{YOUR_S3_BUCKET}/public/*"
+            ],
+            "Effect": "Allow"
+        }
+    ]
+}
+
+Puedo ver que es bastante sencillo dar permisos a usuarios sin autenticarse,dejaré todo cerrado mejor.
