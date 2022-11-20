@@ -1,0 +1,174 @@
+Memoizarion es una tecnica de optimización usada principalmente para acelerar programas almacenando los resultados de llamadas a funciones costosas y retornando el valor cacheado siempre que se diera la misma entrada de datos(same inputs)
+
+El primer caso es bastante claro,en cuanto haya un estado local en cualquier componente un cambio en ese estado va a re-renderizar todos los hijos:
+
+**** CASO UNO ****
+import { memo, useState } from "react";
+import "./App.css";
+
+function Swatch({color}){
+  console.log(`Swatch rendered with ${color} color`)
+  return (
+    <div style={{margin: 2,width:75,height:75,backgroundColor:color}}></div>
+  )
+}
+
+const MemoedSwatch = memo(Swatch);
+
+function App() {
+  const [appRenderIndex, setAppRenderIndex] = useState(0);
+
+  console.log(`App rendered ${appRenderIndex} times`);
+  return (
+    <div className="App">
+      <div className="">
+        <button onClick={() => setAppRenderIndex(appRenderIndex + 1)}>Re-render App</button>
+      </div>
+      <div className="">
+        <MemoedSwatch color="red" />
+      </div>
+    </div>
+  );
+}
+
+export default App;
+
+Realmente es algo que no se hace mucho,o al menos no veo que lo haga casi nadie
+
+*** CASO DOS ***
+Memorización tradicional: con la libreria lodash se puede memorizar cualquier función de forma muy sencilla(usando su método memoize).Fijate que tengo visión sobre esta libreria:
+
+import _ from "lodash";
+
+function swatch(color){
+  console.log(`Swatch: ${color}`);
+  return `Swatch: ${color}`;
+}
+
+const memoedSwatch = _.memoize(swatch)
+
+memoedSwatch("red")
+memoedSwatch("blue")
+memoedSwatch("red")
+memoedSwatch("blue")
+
+Aqui solo habrá dos llamadas a la función,ya que las dos últimas pueden ser servidas desde los resultados cacheados de la primera y segunda.Muy interesante.
+
+En React la memorización funciona de manera diferente.React solamente compara las props anteriores con las nuevas.Esto es importante entender,ya que en el mismo caso de arriba React nunca va a memorizar nada,mientras que lodash si:
+
+const prev = {
+  color:null,
+  result:null,
+}
+
+function rmSwatch(color){
+  if(color === prev.color){
+    return prev.result
+  }
+  prev.color=color;
+  prev.result = swatch(color);
+  return prev.result
+
+}
+
+rmSwatch("red")
+rmSwatch("blue")
+rmSwatch("red")
+rmSwatch("blue") <- veré 4 impresiones por cli,mientras que con _.memoize veo 2
+
+Si que funcionaría asi(cuando se repite la misma): 
+rmSwatch("red")
+rmSwatch("red")
+rmSwatch("blue")
+rmSwatch("blue")
+
+Teniendo en cuenta todo esto la propia documentación de React dice: 
+
+React.memo sólo existe como una optimización de la performance.No lo uses para "prevenir" renderizaciones,pues puede llevar a bugs.Recuerda que React usa un VDom muy ligero que ya es muy eficiente,entonces no es necesario preocuparse por re-renderizaciones
+Los bugs que se refieren es a que se puede desincronizar el Dom y la DAta(JQuery).React no va a permitir eso mientras no use memorización de componentes.
+Recuerda tmb que React sólo va a acceder al DOM cuando encuentre diferencias entre el VDOM y el DOM
+
+IMPORTANTE: memo funciona muy bien cuando use valores primitivos por props.No funciona bien cuando paso objetos o arrays por props(es decir que funciona bien con valores simples)
+
+Esto es asi porque si tengo un componente que recibe un objeto o array aunque le pase el mismo,realmente se crea otro objeto:
+
+const Swatch  = ({params})
+
+<Swatch params={params} /> <- si params es un objeto no me vale,va a mutar siempre,no vale de nada usar React.memo aqui,asinto,memoriza esto 
+
+Y esto sucede porque si React tuviera que comparar objetos en profundidad no sería tan ágil como es,asi que simplemente compara referencias y no valor.Obviamente cambia.No ocurriría asi si comparara el valor,pero es inviable
+
+IMPORTANTE: Sin embargo puedo decirle a React mediante una función comparadora cuando debe considerar la memorización:
+
+const MemoedSwatch = memo(Swatch,(prevProps, nextProps) => {
+  return prevProps.params.color ===  nextProps.params.color;
+}); <- si el color coincide memoriza el componente Swatch, genial!
+
+Otra forma es memorizando el objeto antes de pasarlo:
+const params = useMemo( () => ({color}),[color])
+IMPORTANTE: en este caso params es la misma referencia a la memoria si no cambia,a diferencia de antes que siempre cambiaba ahora solo se crea un nuevo objeto si [color] cambia
+
+De todo esto podemos llegar a la conclusión de que también sólo debo usar useMemo con objetos o arrays,para evitar crear otro,ya que los valores primitivos son comparados por valor:
+
+const value = useMemo( () => number1 + number2,[number1,number2]) <- esta memorización no es eficiente,pues number1 y number2 serán pasados por valor,y no gano nada.Un simple 'const value = number1 + number2' valdría.
+
+Lo mismo para strings o booleans(luego puedo memorizar la regla de que cuando use useMemo tengo que memorizar un objeto o array??)
+Siempre será mejor una constante(más eficiente)
+
+Este si es un buen ejemplo:
+const value = useMemo( () => numbers.reduce((a,v) => a + v,0))
+
+Y otro posible caso de mejora en la performance:
+const multipliedValues = useMemo( () => numbers.map(v => v * 100),[numbers])
+
+Y otro más(porque devuelve un objeto):
+const person = useMemo( () => ({
+  first,
+  last,
+  full:`${first} - ${last}
+}),[first,last]);
+
+IMPORTANTE: fijate que React.memo va bien con primitivos(pues las referencias se mantienen al ser pasados por valor),mientras que useMemo/useCallback es justo al reves,funciona bien con no-primitivos ya que serán pasados por referencia,mutando aun con el mismo valor. 
+
+          USE CALLBACK USING
+
+Veamos este ejemplo sencillo y muy común en el que paso un evento al hijo:
+
+HIJO:
+function Swatch({ params,onClick }) {
+MEMOIZED:
+const MemoedSwatch = memo(Swatch);  
+PADRE:
+<MemoedSwatch params={{color}} onClick={() => {}} />
+
+Dado que el evento cambia en cada re-render no va a entrar por la memorización del cmp.Realmente es la misma función,aunque lógicamente cambia su referencia pues es un objeto estamos en las mismas al mandarla por props(estamos creando una nueva función idéntica)
+Es aqui donde entra el useCallback(apropiado para memorizar funciones y no su retorno,fijate que por fin entiendo la diferencia entre uno y otro,y cuando usarlo)
+
+function App() {
+  const [appRenderIndex, setAppRenderIndex] = useState(0);
+  const [color, setColor] = useState("red");
+
+  console.log(`App rendered ${appRenderIndex} times`);
+
+  const params = useMemo(() => ({ color }), [color]); memorizo el obj
+  const onClick = useCallback(() => () => {}, []); <- memorizo el onClick
+
+  return (
+    <div className="App">
+      <div className="">
+        <button onClick={() => setAppRenderIndex(appRenderIndex + 1)}>Re-render App</button>
+        <button onClick={() => setColor(color === "red" ? "blue" : "red")}>ChangeColor</button>
+      </div>
+      <div className="">
+        <MemoedSwatch params={params} onClick={onClick} /> <- le mando siempre el mismo obj y la misma funcion,luego no se va a re-renderizar y va a ir bien memorizarlo
+
+Desde luego es un tema muy interesante.
+NOTA: React.memo hace una shallow comparison(solo compara referencia y se mantienen)
+
+REMEMBERINGS: 
+1- React.memo no es una memorización tradicional(como si lo es _.memoize de lodash).React solo compara referencias
+2- UseMemo y useCallback son para evitar re-referenciar el mismo ejemplo
+3- UseMemo se debe usar en calculos complejos,useCallback para memorizar eventos.
+4- React ya viene preparado para esto(VDOM,props,...),realmente no es tan importante
+
+
